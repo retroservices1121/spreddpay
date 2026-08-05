@@ -1,0 +1,12 @@
+{
+  "name": "spreddpay-landing",
+  "version": "2.0.0",
+  "private": true,
+  "description": "SpreddPay landing page",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
