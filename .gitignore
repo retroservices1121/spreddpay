@@ -34,3 +34,6 @@ pnpm-debug.log*
 /deps.json
 /inst.json
 /proj.json
+
+# local backup artefacts — never commit a database dump
+/backups/

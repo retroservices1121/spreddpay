@@ -2,7 +2,7 @@
   "name": "spreddpay",
   "version": "0.1.0",
   "private": true,
-  "description": "SpreddPay — multi-tenant payout accounts and branded virtual cards for funded trading firms",
+  "description": "SpreddPay \u00e2\u20ac\u201d multi-tenant payout accounts and branded virtual cards for funded trading firms",
   "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20"
@@ -20,11 +20,14 @@
     "db:push": "pnpm --filter @spreddpay/db push",
     "db:studio": "pnpm --filter @spreddpay/db studio",
     "db:seed": "pnpm --filter @spreddpay/api seed",
-    "demo:reset": "pnpm --filter @spreddpay/api demo:reset"
+    "demo:reset": "pnpm --filter @spreddpay/api demo:reset",
+    "db:backup": "dotenv -e .env -- bash scripts/backup.sh",
+    "db:restore": "bash scripts/restore.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@types/node": "^22.10.5",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.39.5",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
