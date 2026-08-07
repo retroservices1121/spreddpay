@@ -7,6 +7,8 @@ import { Button, Callout, Card, CardBody, Field, Input } from "@spreddpay/ui";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 interface MfaState {
+  kind: "PARTNER_USER" | "PLATFORM_USER" | "TRADER";
+  email: string;
   required: boolean;
   enrolled: boolean;
   verified: boolean;
@@ -37,7 +39,7 @@ export default function MfaPage() {
       }
       const data = (await response.json()) as MfaState;
       setState(data);
-      if (data.verified) router.push("/partners");
+      if (data.kind === "PLATFORM_USER" && data.verified) router.push("/partners");
     })();
   }, [router]);
 
@@ -64,6 +66,12 @@ export default function MfaPage() {
     }
   }
 
+  async function signOut() {
+    await fetch(`${API_URL}/api/v1/auth/logout`, { method: "POST", credentials: "include" });
+    router.push("/login");
+    router.refresh();
+  }
+
   async function beginEnrolment() {
     const result = await call<{ secret: string; otpauthUri: string }>("/auth/mfa/enroll");
     if (result) {
@@ -85,6 +93,34 @@ export default function MfaPage() {
     return (
       <main className="flex min-h-screen items-center justify-center px-4">
         <p className="text-sm text-ink-subtle">Loading…</p>
+      </main>
+    );
+  }
+
+  // One session is shared across all three portals, so the account signed in
+  // here may not be an operator at all. Say so, rather than letting the user
+  // press a button that can only 403.
+  if (state.kind !== "PLATFORM_USER") {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardBody>
+              <Callout tone="caution" title="This is not an operator account">
+                You are signed in as <span className="font-medium">{state.email}</span>, which is a{" "}
+                {state.kind === "TRADER" ? "trader" : "partner"} account. The operations portal
+                needs a SpreddPay operator account.
+              </Callout>
+              <div className="mt-4 flex gap-2">
+                <Button onClick={signOut}>Sign out and use an operator account</Button>
+              </div>
+              <p className="mt-3 text-xs text-ink-subtle">
+                Signing in on any spreddpay.com portal replaces this session, because all three
+                share one sign-in.
+              </p>
+            </CardBody>
+          </Card>
+        </div>
       </main>
     );
   }

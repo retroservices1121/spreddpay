@@ -44,7 +44,15 @@ jobs:
           sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
           sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client
+          # Ubuntu's own archive also ships postgresql-client and outranks
+          # PGDG by default, which is how a "latest" install resolved to 16
+          # against an 18 server. Pin PGDG above it and name the major.
+          sudo sh -c 'printf "Package: *
+Pin: release o=apt.postgresql.org
+Pin-Priority: 600
+" > /etc/apt/preferences.d/pgdg.pref'
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-18
           pg_dump --version
 
       - name: Take backup

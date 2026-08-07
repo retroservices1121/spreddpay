@@ -31,6 +31,11 @@ export async function registerMfaRoutes(app: FastifyInstance, context: AppContex
   app.get("/auth/mfa", async (request) => {
     const principal = requireAuth(request);
     return {
+      // The session cookie is scoped to the parent domain, so one login is
+      // shared by all three portals. The page needs to know *who* is signed in
+      // to explain a non-operator session rather than dead-ending on a 403.
+      kind: principal.kind,
+      email: principal.email,
       required: principal.kind === "PLATFORM_USER",
       enrolled: principal.mfaEnabled,
       verified: principal.mfaVerified,
