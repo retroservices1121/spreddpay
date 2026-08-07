@@ -38,17 +38,31 @@ export async function hydrateMockRain(db: Database, rain: RainService): Promise<
     restored += 1;
   }
 
-  const accounts = await db.financialAccount.findMany({ where: { provider: "RAIN" } });
+  const accounts = await db.financialAccount.findMany({
+    where: { provider: "RAIN" },
+    include: { trader: true },
+  });
+
+  // providerAccountId -> the Rain customer that owns it, so cards and payout
+  // destination checks can be linked back up below.
+  const customerByAccount = new Map<string, string>();
+
   for (const account of accounts) {
     const latest = await db.balanceSnapshot.findFirst({
       where: { financialAccountId: account.id },
       orderBy: { asOf: "desc" },
     });
 
+    // FinancialAccount stores no provider customer id of its own; it comes from
+    // the trader. Restoring an account without it leaves the mock unable to
+    // validate a payout destination, which fails as "no_provider_account".
+    const customerId = account.trader?.rainCustomerId ?? "";
+    if (customerId) customerByAccount.set(account.providerAccountId, customerId);
+
     rain.restoreAccount(
       {
         id: account.providerAccountId,
-        customerId: "",
+        customerId,
         asset: account.asset,
         network: account.network,
         status: account.status === "ACTIVE" ? "ACTIVE" : "PENDING",
@@ -69,10 +83,14 @@ export async function hydrateMockRain(db: Database, rain: RainService): Promise<
 
   const cards = await db.card.findMany({ where: { provider: "RAIN" }, include: { trader: true } });
   for (const card of cards) {
+    // Link the card back to its trader's account, so a card restored after a
+    // restart is as usable as one the mock issued in this process.
+    const account = accounts.find((candidate) => candidate.traderId === card.traderId);
+
     rain.restoreCard({
       id: card.providerCardId,
       customerId: card.trader.rainCustomerId ?? "",
-      accountId: "",
+      accountId: account?.providerAccountId ?? "",
       type: card.type,
       status: card.status,
       last4: card.last4,
