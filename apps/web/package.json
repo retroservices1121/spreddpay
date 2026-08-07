@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "dotenv -e ../../.env -- next dev --port 3001",
     "build": "next build",
-    "start": "next start --port 3001",
+    "start": "next start",
     "lint": "eslint app lib",
     "typecheck": "tsc --noEmit"
   },

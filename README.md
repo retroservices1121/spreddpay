@@ -137,14 +137,21 @@ a fresh clone. CI always provides one, so it always runs there.
 
 ## Deployment
 
-Railway, from this repository.
+Railway, from this repository: **one project, six services** — `landing`, `api`,
+`web`, `partner`, `admin`, `worker` — plus Postgres. A Railway service runs one
+process, so these cannot be combined.
 
-`apps/landing` deploys from its own root directory with no dependencies and no
-build step — deliberately, so spreddpay.com cannot be taken down by a platform
-build failure.
+`apps/landing` is the exception: it deploys from its own root directory with no
+dependencies and no build step, deliberately, so spreddpay.com cannot be taken
+down by a platform build failure. Every other service uses the repo root so pnpm
+workspace resolution works, and selects its app with `--filter`.
 
-Platform services need `DATABASE_URL`, `AUTH_SECRET` and `ENCRYPTION_KEY`.
-`ENCRYPTION_KEY` must be identical across services or previously encrypted
-secrets become undecryptable. See [`docs/operations.md`](./docs/operations.md).
+Root directories, build and start commands, per-service environment variables
+and the first-deploy order are in
+[`docs/deployment.md`](./docs/deployment.md).
+
+Two things that bite if missed: `ENCRYPTION_KEY` and `AUTH_SECRET` must be
+byte-identical across services, and `NEXT_PUBLIC_API_URL` is read at **build**
+time by the three Next.js apps.
 
 Never commit live credentials.
