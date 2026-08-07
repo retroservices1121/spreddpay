@@ -54,12 +54,21 @@ echo "Wrote $FILE (${SIZE} bytes)"
 # Prove the artefact decrypts and looks like a dump before calling it a backup.
 # A backup that has never been read is a hope, not a backup.
 echo "Verifying…"
-if openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:BACKUP_PASSPHRASE -in "$FILE" \
-   | gzip -dc | head -c 4000 | grep -q 'PostgreSQL database dump'; then
-  echo "Verified: decrypts and contains a PostgreSQL dump header."
-else
-  echo "Verification FAILED — the artefact does not decrypt to a valid dump." >&2
-  exit 1
-fi
+# `head` closes the pipe as soon as it has enough bytes, which sends SIGPIPE
+# upstream — and with `set -o pipefail` that reads as a failed pipeline. Relax
+# it just for this read, then restore it.
+set +o pipefail
+HEADER="$(openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:BACKUP_PASSPHRASE -in "$FILE"   | gzip -dc 2>/dev/null | head -c 4000 || true)"
+set -o pipefail
+
+case "$HEADER" in
+  *"PostgreSQL database dump"*)
+    echo "Verified: decrypts and contains a PostgreSQL dump header."
+    ;;
+  *)
+    echo "Verification FAILED — the artefact does not decrypt to a valid dump." >&2
+    exit 1
+    ;;
+esac
 
 echo "$FILE"
