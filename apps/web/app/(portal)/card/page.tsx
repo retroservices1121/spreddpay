@@ -5,7 +5,6 @@ import {
   CardBody,
   CardHeader,
   CardTitle,
-  EmptyState,
   PageHeader,
   StatusBadge,
   VirtualCard,
@@ -15,6 +14,14 @@ import { CardControls } from "./controls";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Card issuance is deferred until the provider's card programme is available.
+ *
+ * The screen is kept rather than removed: the data model, the state machine and
+ * this UI all still work, and a trader who already has a card keeps full use of
+ * it. What changes is that nobody new can be issued one, and the screen says so
+ * plainly instead of offering something the platform cannot currently deliver.
+ */
 export default async function CardPage() {
   const session = await requireTraderSession();
   const cards = await apiFetch<{ data: CardDto[] }>("/me/cards");
@@ -24,13 +31,27 @@ export default async function CardPage() {
   if (!card) {
     return (
       <>
-        <PageHeader title="Card" />
-        <Card>
-          <EmptyState
-            title="No card yet"
-            description="Your virtual card is issued once your account is ready."
-          />
-        </Card>
+        <PageHeader title="Card" description="Spend your payout balance directly." />
+
+        <div className="grid max-w-2xl gap-4">
+          <Card>
+            <CardBody className="py-10 text-center">
+              {/* A muted placeholder in the card's own shape, so the screen
+                  communicates "this is coming" rather than "this is broken". */}
+              <div className="mx-auto mb-5 aspect-[1.586/1] w-full max-w-[19rem] rounded-2xl border border-dashed border-edge bg-surface-muted" />
+              <p className="text-sm font-medium text-ink">Your card is coming soon</p>
+              <p className="mx-auto mt-1 max-w-sm text-sm text-ink-subtle">
+                {productName} cards are not being issued yet. Your payout balance is already
+                available and you can withdraw it at any time.
+              </p>
+            </CardBody>
+          </Card>
+
+          <Callout tone="neutral" title="What you can do now">
+            Payouts from your firm land in your account and appear under Payouts. Withdrawals go to
+            a destination you control. Card spending is added once our card programme opens.
+          </Callout>
+        </div>
       </>
     );
   }
@@ -80,8 +101,7 @@ export default async function CardPage() {
 
           <Callout tone="neutral" title="Where are my full card details?">
             Your full card number and security code are held by our card infrastructure provider,
-            never by this app. Revealing them securely, and adding the card to Apple Pay or Google
-            Pay, arrive in a later release.
+            never by this app.
           </Callout>
         </div>
       </div>

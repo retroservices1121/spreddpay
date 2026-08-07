@@ -402,6 +402,25 @@ importers:
         specifier: ^3.2.7
         version: 3.2.7(@types/node@22.20.1)(jiti@2.7.0)(tsx@4.23.10)
 
+  packages/dakota:
+    dependencies:
+      '@spreddpay/config':
+        specifier: workspace:*
+        version: link:../config
+      '@spreddpay/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.20.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.7
+        version: 3.2.7(@types/node@22.20.1)(jiti@2.7.0)(tsx@4.23.10)
+
   packages/db:
     dependencies:
       '@prisma/client':

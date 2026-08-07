@@ -18,8 +18,8 @@ export default async function CardsPage() {
       <Card>
         {cards.data.length === 0 ? (
           <EmptyState
-            title="No cards issued"
-            description="A card can be issued once a trader reaches card eligibility."
+            title="Card issuance is not yet available"
+            description="Our card programme is not open yet. Payouts and balances work today; cards will appear here once issuance is enabled."
           />
         ) : (
           <Table>

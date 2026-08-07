@@ -77,6 +77,14 @@ export const serverEnvSchema = z
     RAIN_PROGRAM_ID: optionalString,
     RAIN_WEBHOOK_SECRET: optionalString,
 
+    // Dakota — stablecoin infrastructure. Replaces Rain for accounts, KYC,
+    // wallets and transfers. Dakota has no card product; card issuance is
+    // deferred until their card programme opens.
+    DAKOTA_MODE: integrationModeSchema.default("mock"),
+    DAKOTA_API_BASE_URL: optionalString,
+    DAKOTA_API_KEY: optionalString,
+    DAKOTA_WEBHOOK_SECRET: optionalString,
+
     BLEND_MODE: integrationModeSchema.default("mock"),
     BLEND_API_BASE_URL: optionalString,
     BLEND_API_KEY: optionalString,
@@ -113,6 +121,21 @@ export const serverEnvSchema = z
         path: ["SESSION_COOKIE_SAMESITE"],
         message:
           "SESSION_COOKIE_SAMESITE=none requires a Secure cookie, which is only set when NODE_ENV=production. Use lax for local development.",
+      });
+    }
+    if (env.DAKOTA_MODE === "production") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["DAKOTA_MODE"],
+        message:
+          "DAKOTA_MODE=production is disabled until compliance, credentials, signing-key custody and docs/dakota-flow-of-funds.md are settled.",
+      });
+    }
+    if (env.DAKOTA_MODE === "sandbox" && !env.DAKOTA_API_KEY) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["DAKOTA_API_KEY"],
+        message: "DAKOTA_API_KEY is required when DAKOTA_MODE=sandbox",
       });
     }
     if (env.RAIN_MODE === "sandbox") {

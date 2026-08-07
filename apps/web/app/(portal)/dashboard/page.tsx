@@ -79,13 +79,8 @@ export default async function DashboardPage() {
           ) : (
             <Card>
               <EmptyState
-                title="No card yet"
-                description="Your card appears here once onboarding is complete."
-                action={
-                  <Link href="/onboarding">
-                    <Button size="sm">Continue onboarding</Button>
-                  </Link>
-                }
+                title="Card coming soon"
+                description="Cards are not being issued yet. Your payout balance is available now."
               />
             </Card>
           )}
