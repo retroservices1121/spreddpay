@@ -109,6 +109,21 @@ beta. Add a Redis service when you want BullMQ.
 `NODE_ENV=production` also makes session cookies `secure`, so every portal must
 be served over HTTPS. Railway domains are HTTPS by default.
 
+## Live deployment (project `spreddpay`, environment `production`)
+
+| Service | URL |
+| --- | --- |
+| landing | https://spreddpay.com |
+| api | https://api-production-8abf.up.railway.app |
+| web (trader) | https://web-production-a60d3.up.railway.app |
+| partner | https://partner-production-8879.up.railway.app |
+| admin | https://admin-production-6bc6.up.railway.app |
+| worker | no domain |
+
+These are Railway-generated hostnames, which is why `SESSION_COOKIE_SAMESITE`
+is set to `none` on the API — see below. Moving to `spreddpay.com` subdomains
+should be accompanied by setting it back to `lax`.
+
 ## Cookies across subdomains
 
 The session cookie is host-only on the API's domain, `SameSite=Lax`, `httpOnly`.
@@ -116,10 +131,23 @@ A request from `app.spreddpay.com` to `api.spreddpay.com` is **same-site** —
 same registrable domain — so `Lax` permits it and `credentials: "include"`
 works. No cookie `domain` attribute is needed.
 
-This breaks if the API is served from a different registrable domain
-(e.g. `spreddpay-api.up.railway.app` alongside `app.spreddpay.com`). Either put
-everything on `spreddpay.com` subdomains, or the cookie needs
-`SameSite=None; Secure`, which is a code change in `apps/api/src/routes/auth.ts`.
+This breaks if the API is served from a different registrable domain.
+Railway's generated hostnames are exactly that case: `up.railway.app` is on the
+Public Suffix List, so `api-production-8abf` and `web-production-a60d3` are
+different *sites* and a `Lax` cookie is never sent — login appears to succeed
+and then every subsequent request is unauthenticated.
+
+`SESSION_COOKIE_SAMESITE` selects the policy:
+
+| Hosting | Value |
+| --- | --- |
+| `api.spreddpay.com` + `app.spreddpay.com` | `lax` (default, preferred) |
+| Railway-generated `*.up.railway.app` | `none` |
+
+`none` forces `Secure`, so the env schema refuses it outside production. With
+`none`, cross-site request forgery is held off by the CORS allow-list plus the
+JSON content type forcing a preflight — weaker than `lax`, which is why custom
+domains on `spreddpay.com` remain the better end state.
 
 CORS is already restricted to `APP_URL`, `PARTNER_APP_URL` and `ADMIN_APP_URL`,
 so those must be the real public URLs or the browser will block requests.
