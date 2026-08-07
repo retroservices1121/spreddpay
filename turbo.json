@@ -1,0 +1,58 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env", ".env.example"],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "APP_URL",
+    "PARTNER_APP_URL",
+    "ADMIN_APP_URL",
+    "API_URL",
+    "NEXT_PUBLIC_API_URL",
+    "AUTH_SECRET",
+    "ENCRYPTION_KEY",
+    "RAIN_MODE",
+    "RAIN_API_BASE_URL",
+    "RAIN_API_KEY",
+    "RAIN_PROGRAM_ID",
+    "RAIN_WEBHOOK_SECRET",
+    "BLEND_MODE",
+    "BLEND_API_BASE_URL",
+    "BLEND_API_KEY",
+    "BLEND_ORGANIZATION_ID",
+    "BLEND_WEBHOOK_SECRET",
+    "SENTRY_DSN",
+    "POSTHOG_KEY",
+    "DEMO_SEED"
+  ],
+  "tasks": {
+    "generate": {
+      "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "generated/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

@@ -1,12 +1,36 @@
 {
-  "name": "spreddpay-landing",
-  "version": "3.0.0",
+  "name": "spreddpay",
+  "version": "0.1.0",
   "private": true,
-  "description": "Spredd Pay landing page",
+  "description": "SpreddPay — multi-tenant payout accounts and branded virtual cards for funded trading firms",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "start": "node server.js"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "clean": "turbo run clean && rimraf node_modules",
+    "db:generate": "pnpm --filter @spreddpay/db generate",
+    "db:migrate": "pnpm --filter @spreddpay/db migrate",
+    "db:push": "pnpm --filter @spreddpay/db push",
+    "db:studio": "pnpm --filter @spreddpay/db studio",
+    "db:seed": "pnpm --filter @spreddpay/api seed",
+    "demo:reset": "pnpm --filter @spreddpay/api demo:reset"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.10.5",
+    "eslint": "^9.39.5",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.23.9",
+    "turbo": "^2.10.8",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.66.0"
   }
 }

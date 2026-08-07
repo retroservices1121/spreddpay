@@ -1,0 +1,18 @@
+# Keep the build context small and never ship secrets or host build output.
+node_modules
+**/node_modules
+.git
+.github
+.turbo
+**/.turbo
+**/.next
+**/dist
+packages/db/generated
+coverage
+**/coverage
+.env
+.env.*
+!.env.example
+*.log
+.vscode
+.idea

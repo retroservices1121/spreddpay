@@ -1,0 +1,42 @@
+{
+  "name": "@spreddpay/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup",
+    "seed": "dotenv -e ../../.env -- tsx src/seed/index.ts",
+    "demo:reset": "dotenv -e ../../.env -- tsx src/seed/reset.ts",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:db": "dotenv -e ../../.env -- vitest run"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/cors": "^11.3.0",
+    "@fastify/helmet": "^13.1.0",
+    "@fastify/rate-limit": "^11.2.0",
+    "@spreddpay/analytics": "workspace:*",
+    "@spreddpay/auth": "workspace:*",
+    "@spreddpay/blend": "workspace:*",
+    "@spreddpay/config": "workspace:*",
+    "@spreddpay/contracts": "workspace:*",
+    "@spreddpay/db": "workspace:*",
+    "@spreddpay/ledger": "workspace:*",
+    "@spreddpay/notifications": "workspace:*",
+    "@spreddpay/rain": "workspace:*",
+    "fastify": "^5.11.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "dotenv-cli": "^8.0.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.23.9",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

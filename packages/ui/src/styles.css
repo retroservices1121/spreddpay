@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens as RGB triples so Tailwind's `<alpha-value>` works.
+ * --brand-primary / --brand-secondary are overwritten at runtime with the
+ * partner's colours, which is how one build serves every white-label tenant.
+ */
+@layer base {
+  :root {
+    --brand-primary: 17 24 39;
+    --brand-secondary: 99 102 241;
+
+    --surface: 255 255 255;
+    --surface-muted: 249 250 251;
+    --surface-raised: 255 255 255;
+    --edge: 229 231 235;
+
+    --ink: 17 24 39;
+    --ink-muted: 75 85 99;
+    --ink-subtle: 156 163 175;
+
+    --positive: 22 163 74;
+    --caution: 217 119 6;
+    --critical: 220 38 38;
+
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", monospace;
+  }
+
+  .dark {
+    --surface: 10 12 16;
+    --surface-muted: 17 20 27;
+    --surface-raised: 22 26 34;
+    --edge: 39 45 58;
+
+    --ink: 244 246 250;
+    --ink-muted: 165 172 186;
+    --ink-subtle: 113 121 137;
+
+    --positive: 52 199 123;
+    --caution: 245 176 65;
+    --critical: 248 113 113;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface-muted text-ink antialiased;
+    font-family: var(--font-sans);
+  }
+
+  * {
+    @apply border-edge;
+  }
+
+  /* Tabular figures everywhere money appears, so columns line up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}

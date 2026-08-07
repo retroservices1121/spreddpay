@@ -1,0 +1,1183 @@
+// SpreddPay database schema.
+//
+// Rules that the shape of this file encodes:
+//   * Money is BigInt minor units. There is no Float or Decimal anywhere.
+//   * Financial, webhook and audit rows are append-only — no cascade deletes
+//     reach them, and nothing in the API issues a delete against them.
+//   * Every tenant-scoped table carries partnerId and indexes on it, so tenant
+//     isolation is one predicate away in every query.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════════════════════════════ enums
+
+enum PartnerStatus {
+  DRAFT
+  ONBOARDING
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum PartnerRoleName {
+  PARTNER_OWNER
+  PARTNER_ADMIN
+  PAYOUT_CREATOR
+  PAYOUT_APPROVER
+  SUPPORT_AGENT
+  ANALYST
+  READ_ONLY
+}
+
+enum PlatformRoleName {
+  SUPER_ADMIN
+  OPERATIONS
+  SUPPORT
+  FINANCE
+  READ_ONLY
+}
+
+enum TraderStatus {
+  INVITED
+  ACCOUNT_CREATED
+  TERMS_PENDING
+  KYC_PENDING
+  KYC_REVIEW
+  KYC_APPROVED
+  RAIN_ACCOUNT_PENDING
+  RAIN_ACCOUNT_ACTIVE
+  CARD_ELIGIBLE
+  VIRTUAL_CARD_PENDING
+  VIRTUAL_CARD_ACTIVE
+  KYC_REJECTED
+  COUNTRY_UNSUPPORTED
+  ACCOUNT_RESTRICTED
+  CARD_INELIGIBLE
+  PROVIDER_ERROR
+  MANUAL_REVIEW
+}
+
+enum PayoutStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  FUNDING_PENDING
+  SUBMITTED_TO_RAIN
+  PROCESSING
+  COMPLETED
+  REJECTED
+  FAILED
+  CANCELLED
+  REVERSED
+  MANUAL_REVIEW
+}
+
+enum OperationMode {
+  AUTOMATED
+  MANUAL_REQUIRED
+  MANUAL_IN_PROGRESS
+  MANUAL_COMPLETED
+}
+
+enum CardStatus {
+  PENDING
+  ACTIVE
+  FROZEN
+  SUSPENDED
+  CANCELLED
+  EXPIRED
+  REPLACED
+  FAILED
+}
+
+enum CardType {
+  VIRTUAL
+  PHYSICAL
+}
+
+enum SpendLimitInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  PER_TRANSACTION
+}
+
+enum TransactionKind {
+  AUTHORIZATION
+  CAPTURE
+  PAYMENT
+  REFUND
+  REVERSAL
+  FEE
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  CLEARED
+  REVERSED
+  FAILED
+}
+
+enum Provider {
+  RAIN
+  BLEND
+}
+
+enum BalanceSource {
+  RAIN
+  INTERNAL
+  BLEND
+}
+
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum PostingDirection {
+  DEBIT
+  CREDIT
+}
+
+enum WebhookEventStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  FAILED
+  SKIPPED
+}
+
+enum ManualOperationStatus {
+  OPEN
+  IN_PROGRESS
+  BLOCKED
+  COMPLETED
+  CANCELLED
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+}
+
+enum ActorType {
+  PARTNER_USER
+  PLATFORM_USER
+  TRADER
+  SYSTEM
+  PROVIDER
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  WEBHOOK
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  READ
+}
+
+enum RevenueCalculationType {
+  BASIS_POINTS_OF_VOLUME
+  PERCENT_OF_NET_REVENUE
+  FIXED_PER_ACTIVE_CARD
+  FIXED_MONTHLY
+  CUSTOM
+}
+
+enum YieldRevenueCalculationType {
+  BASIS_POINTS_OF_BALANCE
+  PERCENT_OF_REALIZED_YIELD
+  FIXED_PLATFORM_FEE
+}
+
+enum SettlementStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  PAID
+  DISPUTED
+}
+
+enum SupportCaseStatus {
+  OPEN
+  PENDING_TRADER
+  PENDING_PROVIDER
+  RESOLVED
+  CLOSED
+}
+
+enum YieldAccountStatus {
+  NOT_ENABLED
+  DISCLOSURES_PENDING
+  ELIGIBILITY_PENDING
+  ACCOUNT_CREATING
+  ACCOUNT_ACTIVE
+  DEPOSIT_ENABLED
+  INELIGIBLE
+  RESTRICTED
+  ACCOUNT_ERROR
+  DEPOSIT_PAUSED
+  WITHDRAWAL_PAUSED
+  MANUAL_REVIEW
+}
+
+enum YieldTransactionKind {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum YieldTransactionStatus {
+  DRAFT
+  PENDING_AUTHORIZATION
+  SUBMITTED
+  BRIDGING
+  UNWINDING
+  SETTLING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ═══════════════════════════════════════════════════════════════ tenancy
+
+model Partner {
+  id            String        @id @default(cuid())
+  legalName     String
+  displayName   String
+  slug          String        @unique
+  status        PartnerStatus @default(DRAFT)
+  rainProgramId String?
+  defaultAsset  String        @default("USDC")
+  defaultNetwork String       @default("base")
+  supportEmail  String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  branding          PartnerBranding?
+  programs          PartnerProgram[]
+  users             PartnerUser[]
+  traders           Trader[]
+  cards             Card[]
+  payouts           Payout[]
+  transactions      CardTransaction[]
+  financialAccounts FinancialAccount[]
+  ledgerAccounts    LedgerAccount[]
+  ledgerEntries     LedgerEntry[]
+  revenueRules      RevenueRule[]
+  revenueEvents     RevenueEvent[]
+  settlements       PartnerSettlement[]
+  auditEvents       AuditEvent[]
+  notifications     Notification[]
+  apiCredentials    ApiCredential[]
+  webhookEndpoints  PartnerWebhookEndpoint[]
+  featureFlags      FeatureFlag[]
+  supportCases      SupportCase[]
+  manualOperations  ManualOperation[]
+  yieldAccounts     YieldAccount[]
+  yieldRevenueRules YieldRevenueRule[]
+  providerTransfers ProviderTransfer[]
+
+  @@index([status])
+}
+
+model PartnerBranding {
+  id                 String  @id @default(cuid())
+  partnerId          String  @unique
+  productName        String
+  logoUrl            String?
+  iconUrl            String?
+  primaryColor       String  @default("#111827")
+  secondaryColor     String  @default("#6366F1")
+  cardBackground     String?
+  cardLabel          String  @default("Payout Card")
+  poweredBySpreddPay Boolean @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+}
+
+/// Per-partner program configuration: provider linkage and the operational
+/// limits the payout engine enforces.
+model PartnerProgram {
+  id        String  @id @default(cuid())
+  partnerId String
+  provider  Provider @default(RAIN)
+  /// Provider-side program identifier. Null until Rain issues one.
+  providerProgramId String?
+  asset     String  @default("USDC")
+  network   String  @default("base")
+
+  dualApprovalThresholdMinor BigInt @default(1000000000)
+  partnerDailyLimitMinor     BigInt @default(250000000000)
+  singlePayoutMaxMinor       BigInt @default(50000000000)
+  minPayoutMinor             BigInt @default(1000000)
+
+  /// Countries the partner is cleared to onboard. Empty means "not configured",
+  /// which the eligibility check treats as fail-closed.
+  supportedCountries String[] @default([])
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@unique([partnerId, provider])
+  @@index([partnerId])
+}
+
+model PartnerUser {
+  id           String     @id @default(cuid())
+  partnerId    String
+  email        String
+  firstName    String
+  lastName     String
+  passwordHash String?
+  status       UserStatus @default(INVITED)
+  mfaEnabled   Boolean    @default(false)
+  mfaSecret    String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  partner           Partner            @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  roles             PartnerRole[]
+  sessions          Session[]
+  initiatedPayouts  Payout[]           @relation("PayoutInitiator")
+  approvedPayouts   Payout[]           @relation("PayoutApprover")
+  payoutApprovals   PayoutApproval[]
+  assignedCases     SupportCase[]
+
+  @@unique([partnerId, email])
+  @@index([partnerId])
+}
+
+model PartnerRole {
+  id            String          @id @default(cuid())
+  partnerUserId String
+  role          PartnerRoleName
+  grantedAt     DateTime        @default(now())
+  grantedBy     String?
+
+  partnerUser PartnerUser @relation(fields: [partnerUserId], references: [id], onDelete: Cascade)
+
+  @@unique([partnerUserId, role])
+  @@index([partnerUserId])
+}
+
+/// SpreddPay's own operators. Not tenant-scoped.
+model PlatformUser {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  firstName    String
+  lastName     String
+  passwordHash String?
+  status       UserStatus @default(INVITED)
+  mfaEnabled   Boolean    @default(false)
+  mfaSecret    String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  roles            PlatformRole[]
+  sessions         Session[]
+  manualOperations ManualOperation[]
+}
+
+model PlatformRole {
+  id             String           @id @default(cuid())
+  platformUserId String
+  role           PlatformRoleName
+  grantedAt      DateTime         @default(now())
+
+  platformUser PlatformUser @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+
+  @@unique([platformUserId, role])
+}
+
+/// One row per authenticated browser session across all three portals.
+model Session {
+  id             String   @id @default(cuid())
+  tokenHash      String   @unique
+  partnerUserId  String?
+  platformUserId String?
+  traderId       String?
+  ipAddress      String?
+  userAgent      String?
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+
+  partnerUser  PartnerUser?  @relation(fields: [partnerUserId], references: [id], onDelete: Cascade)
+  platformUser PlatformUser? @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+  trader       Trader?       @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+// ═══════════════════════════════════════════════════════════════ traders
+
+model Trader {
+  id               String       @id @default(cuid())
+  partnerId        String
+  externalTraderId String
+  email            String
+  firstName        String
+  lastName         String
+  countryCode      String
+  status           TraderStatus @default(INVITED)
+  rainCustomerId   String?
+  passwordHash     String?
+
+  acceptedTermsVersion String?
+  acceptedTermsAt      DateTime?
+
+  invitedAt   DateTime  @default(now())
+  activatedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  partner           Partner              @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  identityStatuses  TraderIdentityStatus[]
+  providerCustomers ProviderCustomer[]
+  financialAccounts FinancialAccount[]
+  cards             Card[]
+  payouts           Payout[]
+  transactions      CardTransaction[]
+  sessions          Session[]
+  notifications     Notification[]
+  supportCases      SupportCase[]
+  yieldAccount      YieldAccount?
+
+  @@unique([partnerId, externalTraderId])
+  @@index([partnerId, status])
+  @@index([partnerId, email])
+}
+
+/// Append-only history of identity/KYC state as reported by the provider.
+/// SpreddPay stores references and statuses, never identity documents.
+model TraderIdentityStatus {
+  id             String   @id @default(cuid())
+  traderId       String
+  provider       Provider @default(RAIN)
+  status         String
+  reasonCode     String?
+  reasonMessage  String?
+  providerRef    String?
+  reportedAt     DateTime @default(now())
+
+  trader Trader @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@index([traderId, reportedAt])
+}
+
+model ProviderCustomer {
+  id                 String   @id @default(cuid())
+  partnerId          String
+  traderId           String
+  provider           Provider
+  providerCustomerId String
+  status             String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  trader Trader @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerCustomerId])
+  @@index([partnerId])
+  @@index([traderId])
+}
+
+// ═══════════════════════════════════════════════════ accounts & balances
+
+model FinancialAccount {
+  id                String        @id @default(cuid())
+  partnerId         String
+  traderId          String?
+  provider          Provider      @default(RAIN)
+  providerAccountId String
+  asset             String        @default("USDC")
+  network           String?
+  status            String        @default("PENDING")
+  /// Deposit address when the provider exposes one. Never a private key.
+  depositAddress    String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  partner  Partner           @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  trader   Trader?           @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  balances BalanceSnapshot[]
+
+  @@unique([provider, providerAccountId])
+  @@index([partnerId])
+  @@index([traderId])
+}
+
+/// Point-in-time provider balance. Append-only: the provider is the source of
+/// truth and we keep the history so reconciliation can replay it.
+model BalanceSnapshot {
+  id                 String        @id @default(cuid())
+  financialAccountId String
+  partnerId          String
+  traderId           String?
+  asset              String
+  network            String?
+  availableMinor     BigInt        @default(0)
+  pendingMinor       BigInt        @default(0)
+  reservedMinor      BigInt        @default(0)
+  source             BalanceSource @default(RAIN)
+  asOf               DateTime      @default(now())
+  createdAt          DateTime      @default(now())
+
+  financialAccount FinancialAccount @relation(fields: [financialAccountId], references: [id], onDelete: Cascade)
+
+  @@index([financialAccountId, asOf])
+  @@index([traderId, asOf])
+}
+
+// ═══════════════════════════════════════════════════════════════════ cards
+
+model Card {
+  id             String     @id @default(cuid())
+  partnerId      String
+  traderId       String
+  provider       Provider   @default(RAIN)
+  providerCardId String
+  type           CardType   @default(VIRTUAL)
+  /// Last four digits only. Full PAN and CVV never touch this database.
+  last4          String?
+  brand          String?
+  expiryMonth    Int?
+  expiryYear     Int?
+  status         CardStatus @default(PENDING)
+  cardLabel      String     @default("Payout Card")
+  failureCode    String?
+  failureMessage String?
+  createdAt      DateTime   @default(now())
+  activatedAt    DateTime?
+  updatedAt      DateTime   @updatedAt
+
+  partner      Partner           @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  trader       Trader            @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  control      CardControl?
+  transactions CardTransaction[]
+
+  @@unique([provider, providerCardId])
+  @@index([partnerId, status])
+  @@index([traderId])
+}
+
+model CardControl {
+  id                 String              @id @default(cuid())
+  cardId             String              @unique
+  partnerId          String
+  spendLimitMinor    BigInt?
+  spendLimitInterval SpendLimitInterval?
+  allowedCategories  String[]            @default([])
+  blockedCategories  String[]            @default([])
+  allowedCountries   String[]            @default([])
+  onlineEnabled      Boolean             @default(true)
+  contactlessEnabled Boolean             @default(true)
+  atmEnabled         Boolean             @default(false)
+  /// Set when Rain has not confirmed support for a control we expose in the UI.
+  providerSynced     Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId])
+}
+
+// ═════════════════════════════════════════════════════════════════ payouts
+
+model Payout {
+  id                String        @id @default(cuid())
+  partnerId         String
+  traderId          String
+  externalReference String
+  amountMinor       BigInt
+  asset             String        @default("USDC")
+  network           String        @default("base")
+  status            PayoutStatus  @default(DRAFT)
+  operationMode     OperationMode @default(AUTOMATED)
+  memo              String?
+
+  rainTransferId     String?
+  blockchainTxHash   String?
+  requiresDualApproval Boolean @default(false)
+
+  initiatedByUserId String
+  approvedByUserId  String?
+
+  failureCode    String?
+  failureMessage String?
+
+  /// Caller-supplied Idempotency-Key that created this payout.
+  idempotencyKey String?
+
+  createdAt   DateTime  @default(now())
+  approvedAt  DateTime?
+  submittedAt DateTime?
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  partner     Partner            @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  trader      Trader             @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  initiatedBy PartnerUser        @relation("PayoutInitiator", fields: [initiatedByUserId], references: [id])
+  approvedBy  PartnerUser?       @relation("PayoutApprover", fields: [approvedByUserId], references: [id])
+  approvals   PayoutApproval[]
+  transfers   ProviderTransfer[]
+  ledgerEntries LedgerEntry[]
+  manualOperations ManualOperation[]
+
+  @@unique([partnerId, externalReference])
+  @@index([partnerId, status, createdAt])
+  @@index([traderId, createdAt])
+}
+
+/// One row per approval decision. Append-only — this is the dual-approval
+/// evidence trail, so decisions are never updated or removed.
+model PayoutApproval {
+  id            String           @id @default(cuid())
+  payoutId      String
+  partnerId     String
+  partnerUserId String
+  decision      ApprovalDecision
+  note          String?
+  createdAt     DateTime         @default(now())
+
+  payout      Payout      @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  partnerUser PartnerUser @relation(fields: [partnerUserId], references: [id])
+
+  @@unique([payoutId, partnerUserId])
+  @@index([partnerId, createdAt])
+}
+
+/// A movement instruction sent to a provider on behalf of a payout.
+model ProviderTransfer {
+  id                 String   @id @default(cuid())
+  partnerId          String
+  payoutId           String?
+  provider           Provider @default(RAIN)
+  providerTransferId String?
+  status             String
+  amountMinor        BigInt
+  asset              String
+  network            String?
+  txHash             String?
+  /// Network fee charged by the provider, in minor units of `asset`.
+  feeMinor           BigInt?
+  requestPayload     Json?
+  responsePayload    Json?
+  failureCode        String?
+  failureMessage     String?
+  createdAt          DateTime @default(now())
+  settledAt          DateTime?
+  updatedAt          DateTime @updatedAt
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  payout  Payout? @relation(fields: [payoutId], references: [id])
+
+  @@index([partnerId, createdAt])
+  @@index([payoutId])
+  @@index([provider, providerTransferId])
+}
+
+// ═══════════════════════════════════════════════════════════ transactions
+
+model CardTransaction {
+  id                    String            @id @default(cuid())
+  partnerId             String
+  traderId              String
+  cardId                String?
+  provider              Provider          @default(RAIN)
+  providerTransactionId String
+  /// Provider id of the authorization a capture/reversal settles against.
+  providerParentId      String?
+  kind                  TransactionKind
+  status                TransactionStatus
+  amountMinor           BigInt
+  asset                 String            @default("USD")
+  /// Original currency when the merchant billed in something else.
+  originalAmountMinor   BigInt?
+  originalAsset         String?
+
+  merchantName     String?
+  merchantCategory String?
+  merchantCountry  String?
+  merchantId       String?
+
+  declineReason String?
+  occurredAt    DateTime
+  postedAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  trader  Trader  @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  card    Card?   @relation(fields: [cardId], references: [id])
+
+  @@unique([provider, providerTransactionId])
+  @@index([partnerId, occurredAt])
+  @@index([traderId, occurredAt])
+  @@index([cardId, occurredAt])
+}
+
+// ═══════════════════════════════════════════════════════════════ webhooks
+
+/// Raw provider events. Stored before processing, deduplicated by provider event
+/// id, never deleted. Payloads are redacted of card data before they land here.
+model WebhookEvent {
+  id              String             @id @default(cuid())
+  provider        Provider
+  providerEventId String
+  eventType       String
+  partnerId       String?
+  status          WebhookEventStatus @default(RECEIVED)
+  signatureValid  Boolean            @default(false)
+  payload         Json
+  headers         Json?
+  attempts        Int                @default(0)
+  lastError       String?
+  receivedAt      DateTime           @default(now())
+  processedAt     DateTime?
+
+  @@unique([provider, providerEventId])
+  @@index([status, receivedAt])
+  @@index([partnerId, receivedAt])
+}
+
+model PartnerWebhookEndpoint {
+  id          String   @id @default(cuid())
+  partnerId   String
+  url         String
+  /// HMAC signing secret, encrypted at rest with ENCRYPTION_KEY.
+  secretCipher String
+  events      String[] @default([])
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  partner    Partner                  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  deliveries PartnerWebhookDelivery[]
+
+  @@index([partnerId])
+}
+
+model PartnerWebhookDelivery {
+  id           String    @id @default(cuid())
+  endpointId   String
+  partnerId    String
+  eventType    String
+  payload      Json
+  attempts     Int       @default(0)
+  responseCode Int?
+  lastError    String?
+  deliveredAt  DateTime?
+  nextAttemptAt DateTime?
+  createdAt    DateTime  @default(now())
+
+  endpoint PartnerWebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId, createdAt])
+  @@index([endpointId, createdAt])
+}
+
+// ═════════════════════════════════════════════════════ manual operations
+
+model ManualOperation {
+  id          String                @id @default(cuid())
+  partnerId   String?
+  payoutId    String?
+  kind        String
+  status      ManualOperationStatus @default(OPEN)
+  summary     String
+  detail      String?
+  ownerUserId String?
+  providerReference String?
+  evidenceUrl String?
+  reviewedBy  String?
+  createdAt   DateTime              @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime              @updatedAt
+
+  partner Partner?      @relation(fields: [partnerId], references: [id])
+  payout  Payout?       @relation(fields: [payoutId], references: [id])
+  owner   PlatformUser? @relation(fields: [ownerUserId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([partnerId, status])
+}
+
+// ════════════════════════════════════════════════════════════════ ledger
+
+model LedgerAccount {
+  id        String            @id @default(cuid())
+  partnerId String?
+  code      String
+  name      String
+  type      LedgerAccountType
+  asset     String            @default("USDC")
+  createdAt DateTime          @default(now())
+
+  partner  Partner?        @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  postings LedgerPosting[]
+
+  @@unique([partnerId, code, asset])
+  @@index([partnerId])
+}
+
+/// A balanced journal entry. Postings always sum to zero; corrections are made
+/// with a reversing entry, never by editing history.
+model LedgerEntry {
+  id          String   @id @default(cuid())
+  partnerId   String
+  /// Business event that caused this entry, e.g. "payout.completed".
+  eventType   String
+  /// Domain row the entry describes.
+  entityType  String
+  entityId    String
+  payoutId    String?
+  description String
+  /// Set on a reversal to point at the entry it undoes.
+  reversesEntryId String?
+  createdAt   DateTime @default(now())
+
+  partner  Partner         @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  payout   Payout?         @relation(fields: [payoutId], references: [id])
+  postings LedgerPosting[]
+
+  @@index([partnerId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model LedgerPosting {
+  id          String           @id @default(cuid())
+  entryId     String
+  accountId   String
+  partnerId   String
+  direction   PostingDirection
+  /// Always positive. `direction` carries the sign.
+  amountMinor BigInt
+  asset       String           @default("USDC")
+  createdAt   DateTime         @default(now())
+
+  entry   LedgerEntry   @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  account LedgerAccount @relation(fields: [accountId], references: [id])
+
+  @@index([accountId, createdAt])
+  @@index([entryId])
+  @@index([partnerId, createdAt])
+}
+
+// ═══════════════════════════════════════════════════════════════ revenue
+
+model RevenueRule {
+  id                String                 @id @default(cuid())
+  partnerId         String
+  source            String
+  calculationType   RevenueCalculationType
+  spreddPayShareBps Int?
+  partnerShareBps   Int?
+  fixedAmountMinor  BigInt?
+  asset             String                 @default("USDC")
+  notes             String?
+  effectiveFrom     DateTime
+  effectiveTo       DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  partner Partner        @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  events  RevenueEvent[]
+
+  @@index([partnerId, effectiveFrom])
+}
+
+model RevenueEvent {
+  id             String   @id @default(cuid())
+  partnerId      String
+  revenueRuleId  String?
+  source         String
+  entityType     String
+  entityId       String
+  grossMinor     BigInt
+  providerFeeMinor BigInt @default(0)
+  netMinor       BigInt
+  spreddPayMinor BigInt   @default(0)
+  partnerMinor   BigInt   @default(0)
+  asset          String   @default("USDC")
+  /// Realized revenue only. Estimated or unrealized yield is never recognised.
+  realized       Boolean  @default(true)
+  settlementId   String?
+  occurredAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  partner    Partner            @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  rule       RevenueRule?       @relation(fields: [revenueRuleId], references: [id])
+  settlement PartnerSettlement? @relation(fields: [settlementId], references: [id])
+
+  @@index([partnerId, occurredAt])
+  @@index([settlementId])
+}
+
+model PartnerSettlement {
+  id             String           @id @default(cuid())
+  partnerId      String
+  periodStart    DateTime
+  periodEnd      DateTime
+  grossMinor     BigInt           @default(0)
+  providerFeeMinor BigInt         @default(0)
+  spreddPayMinor BigInt           @default(0)
+  partnerMinor   BigInt           @default(0)
+  asset          String           @default("USDC")
+  status         SettlementStatus @default(DRAFT)
+  reviewedBy     String?
+  paidAt         DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  partner Partner        @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  events  RevenueEvent[]
+
+  @@unique([partnerId, periodStart, periodEnd])
+  @@index([partnerId, status])
+}
+
+// ═════════════════════════════════════════════════════════════════ audit
+
+/// Immutable. Written inside the same transaction as the mutation it records.
+model AuditEvent {
+  id         String    @id @default(cuid())
+  partnerId  String?
+  actorType  ActorType
+  actorId    String?
+  actorLabel String?
+  action     String
+  entityType String
+  entityId   String
+  summary    String
+  /// Field-level before/after, already redacted of secrets and card data.
+  changes    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  partner Partner? @relation(fields: [partnerId], references: [id])
+
+  @@index([partnerId, createdAt])
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+}
+
+// ═════════════════════════════════════════════════════════ platform misc
+
+model Notification {
+  id        String              @id @default(cuid())
+  partnerId String?
+  traderId  String?
+  channel   NotificationChannel @default(IN_APP)
+  status    NotificationStatus  @default(QUEUED)
+  template  String
+  subject   String
+  body      String
+  payload   Json?
+  sentAt    DateTime?
+  readAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  partner Partner? @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  trader  Trader?  @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId, createdAt])
+  @@index([traderId, status])
+}
+
+model ApiCredential {
+  id         String    @id @default(cuid())
+  partnerId  String
+  name       String
+  /// Public prefix shown in the UI, e.g. "sp_live_a1b2c3".
+  keyPrefix  String
+  /// Argon2/scrypt hash of the full key. The key itself is shown once.
+  keyHash    String
+  scopes     String[]  @default([])
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  createdBy  String?
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@unique([partnerId, keyPrefix])
+  @@index([partnerId])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  partnerId   String?
+  key         String
+  enabled     Boolean  @default(false)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  partner Partner? @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@unique([partnerId, key])
+  @@index([key])
+}
+
+model SupportCase {
+  id          String            @id @default(cuid())
+  partnerId   String
+  traderId    String?
+  subject     String
+  body        String
+  status      SupportCaseStatus @default(OPEN)
+  assignedTo  String?
+  providerReference String?
+  createdAt   DateTime          @default(now())
+  resolvedAt  DateTime?
+  updatedAt   DateTime          @updatedAt
+
+  partner  Partner      @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  trader   Trader?      @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  assignee PartnerUser? @relation(fields: [assignedTo], references: [id])
+
+  @@index([partnerId, status])
+}
+
+/// Idempotency-Key replay cache. A repeated key with the same request body
+/// returns the stored response; with a different body it is a 409.
+model IdempotencyRecord {
+  id           String   @id @default(cuid())
+  partnerId    String?
+  key          String
+  endpoint     String
+  requestHash  String
+  responseCode Int?
+  responseBody Json?
+  /// Set while the first request is still running so replays do not race it.
+  inFlight     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  @@unique([partnerId, endpoint, key])
+  @@index([expiresAt])
+}
+
+// ═══════════════════════════════════════════ phase 2 — blend yield (models
+// exist so migrations are stable; no Blend code paths ship in Phase 1)
+
+model YieldStrategy {
+  id                String   @id @default(cuid())
+  provider          Provider @default(BLEND)
+  providerStrategyId String
+  name              String
+  description       String?
+  asset             String   @default("USDC")
+  /// Variable, provider-reported. Never presented as guaranteed.
+  currentApyBps     Int?
+  apyAsOf           DateTime?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  accounts YieldAccount[]
+
+  @@unique([provider, providerStrategyId])
+}
+
+model YieldAccount {
+  id                String             @id @default(cuid())
+  partnerId         String
+  traderId          String             @unique
+  provider          Provider           @default(BLEND)
+  providerAccountId String?
+  status            YieldAccountStatus @default(NOT_ENABLED)
+  strategyId        String?
+  balanceMinor      BigInt             @default(0)
+  asset             String             @default("USDC")
+  disclosuresVersion String?
+  disclosuresAcceptedAt DateTime?
+  autoAllocationEnabled Boolean        @default(false)
+  /// Amount always left available for card spending before auto-allocation.
+  spendBufferMinor  BigInt             @default(0)
+  balanceAsOf       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  partner      Partner            @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  trader       Trader             @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  strategy     YieldStrategy?     @relation(fields: [strategyId], references: [id])
+  transactions YieldTransaction[]
+
+  @@index([partnerId, status])
+}
+
+model YieldTransaction {
+  id                    String                 @id @default(cuid())
+  yieldAccountId        String
+  partnerId             String
+  traderId              String
+  kind                  YieldTransactionKind
+  status                YieldTransactionStatus @default(DRAFT)
+  amountMinor           BigInt
+  asset                 String                 @default("USDC")
+  providerIntentId      String?
+  providerTransactionId String?
+  txHash                String?
+  failureCode           String?
+  failureMessage        String?
+  createdAt             DateTime               @default(now())
+  completedAt           DateTime?
+  updatedAt             DateTime               @updatedAt
+
+  yieldAccount YieldAccount @relation(fields: [yieldAccountId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId, createdAt])
+  @@index([yieldAccountId, createdAt])
+}
+
+model YieldRevenueRule {
+  id                String                      @id @default(cuid())
+  partnerId         String
+  calculationType   YieldRevenueCalculationType
+  spreddPayShareBps Int                         @default(0)
+  partnerShareBps   Int                         @default(0)
+  userShareBps      Int                         @default(10000)
+  effectiveFrom     DateTime                    @default(now())
+  effectiveTo       DateTime?
+  createdAt         DateTime                    @default(now())
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId, effectiveFrom])
+}

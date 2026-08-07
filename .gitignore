@@ -1,0 +1,30 @@
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# generated
+packages/db/generated/
+coverage/
+
+# env — never commit live credentials
+.env
+.env.*
+!.env.example
+
+# editors / os
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

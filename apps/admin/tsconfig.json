@@ -1,0 +1,11 @@
+{
+  "extends": "@spreddpay/config/tsconfig/next.json",
+  "compilerOptions": {
+    "types": ["node", "react", "react-dom"],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
