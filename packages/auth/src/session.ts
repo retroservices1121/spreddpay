@@ -81,6 +81,7 @@ export async function loadPrincipal(db: Database, token: string): Promise<Princi
       partnerId: user.partnerId,
       roles: user.roles.map((role) => role.role),
       mfaEnabled: user.mfaEnabled,
+      mfaVerified: session.mfaVerifiedAt !== null,
       sessionId: session.id,
     });
   }
@@ -95,6 +96,7 @@ export async function loadPrincipal(db: Database, token: string): Promise<Princi
       lastName: user.lastName,
       roles: user.roles.map((role) => role.role),
       mfaEnabled: user.mfaEnabled,
+      mfaVerified: session.mfaVerifiedAt !== null,
       sessionId: session.id,
     });
   }

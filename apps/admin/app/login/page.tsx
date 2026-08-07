@@ -34,7 +34,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/partners");
+      // /mfa forwards to /partners once the second factor is satisfied.
+      router.push("/mfa");
       router.refresh();
     } catch {
       setError("Could not reach the SpreddPay API.");

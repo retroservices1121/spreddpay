@@ -25,6 +25,9 @@ export async function registerAuthRoutes(app: FastifyInstance, context: AppConte
     secure: context.env.NODE_ENV === "production",
     path: "/",
     maxAge: SESSION_TTL_SECONDS,
+    // Scope to the parent domain so the server-rendered portals receive the
+    // cookie too. Omitted locally, where a shared localhost jar covers it.
+    ...(context.env.SESSION_COOKIE_DOMAIN ? { domain: context.env.SESSION_COOKIE_DOMAIN } : {}),
   };
 
   app.post("/auth/login", async (request, reply) => {
@@ -97,7 +100,12 @@ export async function registerAuthRoutes(app: FastifyInstance, context: AppConte
     if (request.principal) {
       await revokeSession(context.db, request.principal.sessionId);
     }
-    reply.clearCookie(SESSION_COOKIE, { path: "/" });
+    reply.clearCookie(SESSION_COOKIE, {
+      path: "/",
+      // Must match the attributes it was set with, or logout silently leaves
+      // the cookie in place.
+      ...(context.env.SESSION_COOKIE_DOMAIN ? { domain: context.env.SESSION_COOKIE_DOMAIN } : {}),
+    });
     return { ok: true };
   });
 

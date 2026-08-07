@@ -214,5 +214,6 @@ export function toSessionUserDto(principal: Principal): SessionUserDto {
     platformRoles: [...principal.platformRoles],
     permissions: [...principal.permissions],
     mfaEnabled: principal.mfaEnabled,
+    mfaVerified: principal.mfaVerified,
   };
 }

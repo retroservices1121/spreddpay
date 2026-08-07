@@ -31,7 +31,34 @@ export interface Principal {
   platformRoles: readonly PlatformRoleName[];
   permissions: ReadonlySet<Permission>;
   mfaEnabled: boolean;
+  /** True once this session has presented the second factor. */
+  mfaVerified: boolean;
   sessionId: string;
+}
+
+/**
+ * Whether a principal has satisfied the second-factor requirement.
+ *
+ * Platform operators must always satisfy it: if MFA is not yet enrolled they
+ * are required to enrol before the portal becomes usable, so "never set it up"
+ * is not a way around it. Partner users and traders are unaffected for now —
+ * enforcing it there is a partner-facing policy decision, not a platform one.
+ */
+export function mfaSatisfied(principal: Principal): boolean {
+  if (principal.kind !== "PLATFORM_USER") return true;
+  return principal.mfaEnabled && principal.mfaVerified;
+}
+
+export function requireMfa(principal: Principal): void {
+  if (mfaSatisfied(principal)) return;
+
+  throw new AppError(
+    "FORBIDDEN",
+    principal.mfaEnabled
+      ? "This session has not completed two-factor authentication."
+      : "Two-factor authentication must be set up before using the operations portal.",
+    { mfaEnrolled: principal.mfaEnabled, mfaVerified: principal.mfaVerified },
+  );
 }
 
 export function buildPartnerPrincipal(input: {
@@ -42,6 +69,7 @@ export function buildPartnerPrincipal(input: {
   partnerId: string;
   roles: readonly PartnerRoleName[];
   mfaEnabled: boolean;
+  mfaVerified?: boolean;
   sessionId: string;
 }): Principal {
   return {
@@ -56,6 +84,7 @@ export function buildPartnerPrincipal(input: {
     platformRoles: [],
     permissions: partnerRolePermissions(input.roles) as ReadonlySet<Permission>,
     mfaEnabled: input.mfaEnabled,
+    mfaVerified: input.mfaVerified ?? false,
     sessionId: input.sessionId,
   };
 }
@@ -67,6 +96,7 @@ export function buildPlatformPrincipal(input: {
   lastName: string;
   roles: readonly PlatformRoleName[];
   mfaEnabled: boolean;
+  mfaVerified?: boolean;
   sessionId: string;
 }): Principal {
   return {
@@ -81,6 +111,7 @@ export function buildPlatformPrincipal(input: {
     platformRoles: input.roles,
     permissions: platformRolePermissions(input.roles) as ReadonlySet<Permission>,
     mfaEnabled: input.mfaEnabled,
+    mfaVerified: input.mfaVerified ?? false,
     sessionId: input.sessionId,
   };
 }
@@ -107,6 +138,7 @@ export function buildTraderPrincipal(input: {
     // by the /me routes, each of which scopes to principal.traderId.
     permissions: new Set<Permission>(),
     mfaEnabled: false,
+    mfaVerified: true,
     sessionId: input.sessionId,
   };
 }

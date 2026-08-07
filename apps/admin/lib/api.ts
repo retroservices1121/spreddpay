@@ -66,6 +66,14 @@ export async function requireOperator(): Promise<AdminSession> {
   if (session.user.kind !== "PLATFORM_USER") {
     redirect("/login?error=not-an-operator");
   }
+
+  // A session that has not presented the second factor cannot use the portal.
+  // Send it to enrol or verify rather than rendering a page whose every API
+  // call would 403.
+  if (!session.user.mfaEnabled || !session.user.mfaVerified) {
+    redirect("/mfa");
+  }
+
   return session;
 }
 

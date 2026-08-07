@@ -7,6 +7,7 @@ import type { AppContext } from "./context";
 import { registerAuth } from "./plugins/auth";
 import { registerErrorHandler } from "./plugins/errors";
 import { registerAuthRoutes } from "./routes/auth";
+import { registerMfaRoutes } from "./routes/mfa";
 import { registerPartnerRoutes } from "./routes/partners";
 import { registerTraderRoutes } from "./routes/me";
 import { registerAdminRoutes } from "./routes/admin";
@@ -93,6 +94,7 @@ export async function buildServer(context: AppContext): Promise<FastifyInstance>
       }));
 
       await registerAuthRoutes(scoped, context);
+      await registerMfaRoutes(scoped, context);
       await registerPartnerRoutes(scoped, context);
       await registerTraderRoutes(scoped, context);
       await registerAdminRoutes(scoped, context);

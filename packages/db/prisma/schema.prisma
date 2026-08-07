@@ -431,6 +431,10 @@ model Session {
   userAgent      String?
   expiresAt      DateTime
   revokedAt      DateTime?
+  /// Set once the second factor has been presented on this session. A platform
+  /// session with MFA enrolled is unusable until this is populated, so a stolen
+  /// cookie alone is not enough to reach the operations portal.
+  mfaVerifiedAt  DateTime?
   createdAt      DateTime @default(now())
 
   partnerUser  PartnerUser?  @relation(fields: [partnerUserId], references: [id], onDelete: Cascade)

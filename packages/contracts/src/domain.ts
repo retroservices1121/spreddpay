@@ -157,6 +157,7 @@ export interface SessionUserDto {
   platformRoles: PlatformRoleName[];
   permissions: string[];
   mfaEnabled: boolean;
+  mfaVerified: boolean;
 }
 
 export interface PartnerDashboardDto {

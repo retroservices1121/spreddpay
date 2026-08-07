@@ -52,6 +52,21 @@ export const serverEnvSchema = z
      * content type, which forces a preflight.
      */
     SESSION_COOKIE_SAMESITE: z.enum(["lax", "none", "strict"]).default("lax"),
+    /**
+     * Cookie Domain attribute, e.g. ".spreddpay.com".
+     *
+     * Without it the session cookie is host-only to the API's hostname. That is
+     * fine for a browser talking to the API directly — but the portals are
+     * server-rendered and forward the caller's cookie from their *own* server,
+     * and the browser never sends an api.spreddpay.com cookie to
+     * partner.spreddpay.com. The result is a login that succeeds and then
+     * bounces straight back to the login page.
+     *
+     * Local development does not need it: cookies ignore ports, so
+     * localhost:4000 and localhost:3002 already share one cookie jar. That is
+     * also why this only shows up once real hostnames are involved.
+     */
+    SESSION_COOKIE_DOMAIN: optionalString,
     ENCRYPTION_KEY: z
       .string()
       .regex(/^[0-9a-fA-F]{64}$/, "ENCRYPTION_KEY must be 64 hex characters (32 bytes)"),
