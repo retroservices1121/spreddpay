@@ -136,6 +136,40 @@ describe.skipIf(!hasDatabase)("tenant isolation (database)", () => {
     expect(untouched?.firstName).toBe("Bo");
   });
 
+  it("deleting another tenant's record throws and leaves the row intact", async () => {
+    const scoped = forPartner(db, partnerA);
+    await expect(scoped.trader.delete({ where: { id: traderB } })).rejects.toThrow(
+      CrossTenantAccessError,
+    );
+
+    // The guard has to run before the delete, not after — throwing afterwards
+    // would not put the row back.
+    const survivor = await db.trader.findUnique({ where: { id: traderB } });
+    expect(survivor).not.toBeNull();
+  });
+
+  it("deleteMany cannot reach outside the scope", async () => {
+    const scoped = forPartner(db, partnerA);
+    const before = await db.trader.count({ where: { partnerId: partnerB } });
+
+    // No where clause at all — the extension has to supply the tenant filter.
+    const scratch = await db.trader.create({
+      data: {
+        partnerId: partnerA,
+        externalTraderId: `ISO-A-DELETEMANY-${suffix}`,
+        email: `iso-a-deletemany-${suffix}@isolation.test`,
+        firstName: "Eve",
+        lastName: "Epsilon",
+        countryCode: "US",
+      },
+    });
+
+    await scoped.trader.deleteMany({ where: { id: scratch.id } });
+
+    expect(await db.trader.findUnique({ where: { id: scratch.id } })).toBeNull();
+    expect(await db.trader.count({ where: { partnerId: partnerB } })).toBe(before);
+  });
+
   it("updateMany cannot reach outside the scope", async () => {
     const scoped = forPartner(db, partnerA);
     const result = await scoped.trader.updateMany({ data: { countryCode: "GB" } });
