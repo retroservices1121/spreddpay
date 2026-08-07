@@ -35,22 +35,20 @@ jobs:
           exit $missing
 
       - name: Install postgresql-client
-        # The client major version must be >= the server or pg_dump refuses
-        # outright. Railway's Postgres was 18 at the time of writing and will
-        # keep moving, so this installs PGDG's latest client rather than pinning
-        # a major — a newer client can always dump an older server, not the
-        # reverse.
+        # The client major must be >= the server or pg_dump refuses outright.
+        # Railway's Postgres is 18. Ubuntu's own archive also ships
+        # postgresql-client and outranks PGDG by default, which is how an
+        # earlier "install the latest" attempt still resolved to 16 — so PGDG
+        # is pinned above it and the major is named explicitly.
         run: |
           sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
-          sudo apt-get update -qq
-          # Ubuntu's own archive also ships postgresql-client and outranks
-          # PGDG by default, which is how a "latest" install resolved to 16
-          # against an 18 server. Pin PGDG above it and name the major.
-          sudo sh -c 'printf "Package: *
-Pin: release o=apt.postgresql.org
-Pin-Priority: 600
-" > /etc/apt/preferences.d/pgdg.pref'
+          sudo tee /etc/apt/preferences.d/pgdg.pref >/dev/null <<'PREF'
+          Package: *
+          Pin: release o=apt.postgresql.org
+          Pin-Priority: 600
+          PREF
+          sudo sed -i 's/^          //' /etc/apt/preferences.d/pgdg.pref
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-client-18
           pg_dump --version
