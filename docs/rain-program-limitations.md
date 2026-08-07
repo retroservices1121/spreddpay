@@ -1,6 +1,6 @@
 # Rain program limitations
 
-Capabilities SpreddPay's UI or data model anticipates, but which Rain has **not**
+Capabilities Spredd Pay's UI or data model anticipates, but which Rain has **not**
 confirmed for this program. Anything listed here must be feature-flagged off or
 labelled honestly in the interface — never simulated.
 
@@ -9,7 +9,7 @@ labelled honestly in the interface — never simulated.
 The program has not been reviewed against Rain's documentation yet, so the
 column that matters is "Confirmed", and it is empty for everything.
 
-| Capability | Modelled in SpreddPay | Confirmed by Rain | Current behaviour |
+| Capability | Modelled in Spredd Pay | Confirmed by Rain | Current behaviour |
 | --- | --- | --- | --- |
 | Virtual card issuance | `Card`, `issueVirtualCard` | ☐ | Mock only |
 | Freeze / unfreeze | `freezeCard` / `unfreezeCard` | ☐ | Mock only |
@@ -29,7 +29,7 @@ column that matters is "Confirmed", and it is empty for everything.
 - The sandbox adapter throws `RainCapabilityUnavailableError`, which the API
   surfaces as HTTP 501 with a message pointing at this file. It does not fall
   back to mock behaviour.
-- Where SpreddPay stores something the provider does not enforce — spending
+- Where Spredd Pay stores something the provider does not enforce — spending
   controls being the live example — the UI must say so. Showing a limit that
   nothing enforces is worse than showing no limit.
 

@@ -33,7 +33,7 @@ export function AppShell({
 }: {
   productName: string;
   logoUrl?: string | null;
-  /** Show the SpreddPay mark when no partner logo is set. */
+  /** Show the Spredd Pay mark when no partner logo is set. */
   useSpreddPayMark?: boolean;
   sections: NavSection[];
   currentPath: string;
@@ -151,9 +151,9 @@ export function AppShell({
 /**
  * The header brand.
  *
- * Order of preference: the partner's own logo, then the SpreddPay mark, then a
+ * Order of preference: the partner's own logo, then the Spredd Pay mark, then a
  * letter tile. The middle case matters for the white-label promise — a partner
- * portal shows SpreddPay's mark because it *is* SpreddPay's product, while a
+ * portal shows Spredd Pay's mark because it *is* Spredd Pay's product, while a
  * trader app that has a partner logo never shows our mark at all.
  */
 function Brand({

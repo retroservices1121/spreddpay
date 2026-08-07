@@ -2,7 +2,7 @@
 
 ## One project, six services
 
-A Railway **service** runs one process on one port. SpreddPay is six processes,
+A Railway **service** runs one process on one port. Spredd Pay is six processes,
 so it is six services — all inside a **single Railway project**, sharing one
 Postgres. They cannot be combined into one service.
 

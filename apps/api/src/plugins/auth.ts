@@ -61,7 +61,7 @@ export function requireTrader(request: FastifyRequest): Principal {
 export function requirePlatformUser(request: FastifyRequest): Principal {
   const principal = requireAuth(request);
   if (principal.kind !== "PLATFORM_USER") {
-    throw AppError.forbidden("This endpoint is only available to SpreddPay operators.");
+    throw AppError.forbidden("This endpoint is only available to Spredd Pay operators.");
   }
   requireMfa(principal);
   return principal;

@@ -7,7 +7,7 @@
  *
  * Milestone 8 onward fills this in against Blend's *current official*
  * documentation (https://docs.blend.money/). Method names below are placeholders
- * for SpreddPay's own adapter surface; the real SDK method names must be read
+ * for Spredd Pay's own adapter surface; the real SDK method names must be read
  * from Blend's docs, not assumed from this file.
  *
  * Two product rules constrain whatever gets written here:

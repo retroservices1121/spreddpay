@@ -71,7 +71,7 @@ export function NewPayoutForm({
       router.push(`/payouts/${payload?.id ?? ""}`);
       router.refresh();
     } catch {
-      setError("Could not reach the SpreddPay API.");
+      setError("Could not reach the Spredd Pay API.");
     } finally {
       setPending(false);
     }

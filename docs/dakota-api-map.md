@@ -31,11 +31,11 @@ Three headers on every call:
 
 ## Domain model
 
-Dakota's own terminology, which does **not** map one-to-one onto SpreddPay's:
+Dakota's own terminology, which does **not** map one-to-one onto Spredd Pay's:
 
 | Dakota | Meaning |
 | --- | --- |
-| **Client** | Us. SpreddPay. |
+| **Client** | Us. Spredd Pay. |
 | **Customer** | A business or individual we process payments for. Requires KYB/KYC. |
 | **Sub-Client** | A business customer designated at creation as an intermediary, so other customers group beneath it. |
 | **Recipient** | An entity that receives payments on behalf of a customer. |
@@ -45,7 +45,7 @@ Dakota's own terminology, which does **not** map one-to-one onto SpreddPay's:
 
 ## Capability map
 
-| SpreddPay method | Dakota endpoint | Verified |
+| Spredd Pay method | Dakota endpoint | Verified |
 | --- | --- | --- |
 | `createCustomer` | `POST /customers` | ✅ documented |
 | `getCustomer` | `GET /customers/{id}` | ✅ documented |
@@ -68,7 +68,7 @@ testing. Everything marked ❌ throws rather than returning a permissive default
 
 1. `POST /customers` → returns `id`, `application_id`, `application_url`.
 2. Send the customer to `application_url` — Dakota hosts the KYB/KYC form, so
-   SpreddPay never handles identity documents.
+   Spredd Pay never handles identity documents.
 3. Wait for `kyb_status: "active"`, via the `customer.kyb_status.updated`
    webhook in production or
    `POST /sandbox/simulate/onboarding` with `type: "kyb_approve"` in sandbox.
@@ -88,7 +88,7 @@ A Dakota wallet transaction requires an intent that is:
 5. submitted alongside the intent
 
 **An API key alone cannot move funds.** That is a materially stronger posture
-than a custodial provider — and a real constraint: SpreddPay must hold a signing
+than a custodial provider — and a real constraint: Spredd Pay must hold a signing
 key somewhere, and where that key lives is a security decision, not an
 implementation detail. It is deliberately unanswered in code.
 See [`dakota-flow-of-funds.md`](./dakota-flow-of-funds.md).
@@ -132,10 +132,10 @@ To be read from https://docs.dakota.xyz/documentation/webhooks:
 Dakota has no "account with a balance" for an end user in the way Rain did. Two
 shapes are possible, and they are materially different products:
 
-**A. Trader as Recipient.** SpreddPay or the partner holds one Dakota wallet;
+**A. Trader as Recipient.** Spredd Pay or the partner holds one Dakota wallet;
 each trader is a Recipient with a crypto Destination they control. Payouts are
 wallet transactions out to that destination.
-*Simple, and the trader custodies their own funds — but SpreddPay shows no
+*Simple, and the trader custodies their own funds — but Spredd Pay shows no
 trader balance, because the funds leave the platform's view on payout.*
 
 **B. Trader as Customer with their own wallet.** Each trader is a Dakota

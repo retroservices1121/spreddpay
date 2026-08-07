@@ -3,7 +3,7 @@ import { requireTraderSession } from "@/lib/api";
 import { TraderShell } from "./shell";
 
 /**
- * The trader sees the partner's product, not SpreddPay. Branding is resolved
+ * The trader sees the partner's product, not Spredd Pay. Branding is resolved
  * from the session and applied here, so every screen below inherits it.
  */
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {

@@ -52,13 +52,13 @@ export default async function CardDetailPage({
         <div>
           <VirtualCard
             card={card}
-            productName={session.branding?.productName ?? "SpreddPay"}
+            productName={session.branding?.productName ?? "Spredd Pay"}
             cardLabel={card.cardLabel}
             cardBackground={session.branding?.cardBackground}
             holderName={traderName}
           />
           <p className="mt-3 text-xs text-ink-subtle">
-            Masked details only. Full card number and CVV are never stored by SpreddPay and are
+            Masked details only. Full card number and CVV are never stored by Spredd Pay and are
             revealed, when supported, through Rain&apos;s own secure method.
           </p>
         </div>
@@ -120,7 +120,7 @@ export default async function CardDetailPage({
 
                   <div className="mt-4">
                     <Callout tone="caution" title="Recorded, not yet enforced by the network">
-                      These controls are stored by SpreddPay. Pushing them to Rain lands in
+                      These controls are stored by Spredd Pay. Pushing them to Rain lands in
                       Milestone 4, once the control endpoints are verified against Rain&apos;s
                       private documentation. <Badge tone="caution">not synced</Badge>
                     </Callout>

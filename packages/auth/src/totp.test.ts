@@ -133,9 +133,12 @@ describe("generateTotpSecret", () => {
 describe("totpEnrollmentUri", () => {
   it("builds a scannable otpauth URI", () => {
     const uri = totpEnrollmentUri({ secret: "GEZDGNBVGY3TQOJQ", accountName: "ops@spreddpay.com" });
-    expect(uri.startsWith("otpauth://totp/SpreddPay%3Aops%40spreddpay.com?")).toBe(true);
+    // The label is percent-encoded, so the space in "Spredd Pay" is %20 and
+    // URLSearchParams renders it as "+" in the issuer parameter. Both are what
+    // authenticator apps expect; a literal space would not be a valid URI.
+    expect(uri.startsWith("otpauth://totp/Spredd%20Pay%3Aops%40spreddpay.com?")).toBe(true);
     expect(uri).toContain("secret=GEZDGNBVGY3TQOJQ");
-    expect(uri).toContain("issuer=SpreddPay");
+    expect(uri).toContain("issuer=Spredd+Pay");
     expect(uri).toContain("digits=6");
     expect(uri).toContain("period=30");
   });

@@ -28,7 +28,7 @@ accidentally pointing at a live card program is not symmetric.
 
 ## Mock-mode rehydration
 
-`MockRainService` holds state in memory. On boot the API replays SpreddPay's own
+`MockRainService` holds state in memory. On boot the API replays Spredd Pay's own
 provider references back into it (`hydrateMockRain`), so a restart does not make
 a seeded card unrecognisable to the mock. It restores nothing the platform does
 not already have in its own database.

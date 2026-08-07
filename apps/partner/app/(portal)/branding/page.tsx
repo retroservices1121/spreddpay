@@ -15,7 +15,7 @@ export default async function BrandingPage() {
     <>
       <PageHeader
         title="Branding"
-        description="Your traders see your product. SpreddPay operates the software layer underneath."
+        description="Your traders see your product. Spredd Pay operates the software layer underneath."
       />
       <div className="max-w-3xl">
         <BrandingForm

@@ -15,7 +15,7 @@ export default async function ApiKeysPage() {
     <>
       <PageHeader
         title="API keys"
-        description="Server-to-server credentials for the SpreddPay Partner API."
+        description="Server-to-server credentials for the Spredd Pay Partner API."
       />
 
       <div className="max-w-2xl">

@@ -128,7 +128,7 @@ export function verifyTotp(
 /**
  * The otpauth:// URI an authenticator app scans.
  *
- * `issuer` appears as the account label, so operators can tell SpreddPay apart
+ * `issuer` appears as the account label, so operators can tell Spredd Pay apart
  * from everything else in their app.
  */
 export function totpEnrollmentUri(input: {
@@ -136,7 +136,7 @@ export function totpEnrollmentUri(input: {
   accountName: string;
   issuer?: string;
 }): string {
-  const issuer = input.issuer ?? "SpreddPay";
+  const issuer = input.issuer ?? "Spredd Pay";
   const label = encodeURIComponent(`${issuer}:${input.accountName}`);
   const params = new URLSearchParams({
     secret: input.secret,

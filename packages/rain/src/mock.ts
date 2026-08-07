@@ -447,7 +447,7 @@ export class MockRainService implements RainService {
   /**
    * The mock holds its state in memory, so a restarted API would not recognise
    * the provider ids the demo seed wrote to the database. These `restore*`
-   * methods let the caller replay SpreddPay's own records back into the mock at
+   * methods let the caller replay Spredd Pay's own records back into the mock at
    * boot, which keeps freeze/unfreeze and balance lookups working across
    * restarts. Nothing here fabricates state the platform does not already hold.
    */

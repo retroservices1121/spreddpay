@@ -33,7 +33,7 @@ Enforced in `packages/ledger/src/entry.ts`, not by convention:
 | `CARD_SPEND_CLEARED` | LIABILITY | Credit | Settled card spend |
 | `CARD_REFUNDS` | ASSET | Debit | Contra-spend from refunds and reversals |
 | `PROVIDER_FEES` | EXPENSE | Debit | Fees charged by a provider |
-| `SPREDDPAY_REVENUE` | REVENUE | Credit | SpreddPay's realized share |
+| `SPREDDPAY_REVENUE` | REVENUE | Credit | Spredd Pay's realized share |
 | `PARTNER_REVENUE_PAYABLE` | LIABILITY | Credit | The partner's realized share, owed to them |
 | `ADJUSTMENTS` | EQUITY | — | Clearing account for revenue recognition and manual corrections |
 
@@ -109,12 +109,12 @@ Declines post nothing — no money moved.
 | Account | Direction | Amount |
 | --- | --- | --- |
 | `ADJUSTMENTS` | DEBIT | gross |
-| `SPREDDPAY_REVENUE` | CREDIT | SpreddPay share |
+| `SPREDDPAY_REVENUE` | CREDIT | Spredd Pay share |
 | `PARTNER_REVENUE_PAYABLE` | CREDIT | partner share |
 | `PROVIDER_FEES` | CREDIT | residual |
 
 Anything a revenue rule does not allocate lands in `PROVIDER_FEES` rather than
-silently inflating SpreddPay's share.
+silently inflating Spredd Pay's share.
 
 ## Reconciliation
 

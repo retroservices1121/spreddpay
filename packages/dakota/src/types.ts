@@ -7,7 +7,7 @@
  * docs/dakota-api-map.md with the page it came from.
  *
  * Dakota's domain model, in its own words:
- *   Client      — us. SpreddPay.
+ *   Client      — us. Spredd Pay.
  *   Customer    — a business or individual we process payments for. KYB/KYC'd.
  *   Sub-Client  — a business customer designated as an intermediary, so other
  *                 customers can be grouped underneath it.
@@ -22,7 +22,7 @@
  *   1. Dakota issues no cards. Card issuance is deferred until their card
  *      programme opens.
  *   2. Wallets are non-custodial and require an ES256 signature over an
- *      RFC 8785-canonicalised intent. SpreddPay cannot move funds by API key
+ *      RFC 8785-canonicalised intent. Spredd Pay cannot move funds by API key
  *      alone, which is a stronger security posture than a custodial provider
  *      and a real constraint on where signing keys live.
  */
@@ -176,7 +176,7 @@ export interface DakotaTransaction {
  * A wallet transfer intent.
  *
  * Dakota requires this to be canonicalised (RFC 8785 JCS), SHA-256 hashed and
- * signed with an ES256 key before submission. SpreddPay builds the intent; the
+ * signed with an ES256 key before submission. Spredd Pay builds the intent; the
  * signature comes from a signer the platform controls. See
  * docs/dakota-flow-of-funds.md for where that key is expected to live — which
  * is an open question and deliberately not answered in code yet.
@@ -213,7 +213,7 @@ export interface DakotaWebhookEvent {
 }
 
 /**
- * The adapter surface SpreddPay codes against.
+ * The adapter surface Spredd Pay codes against.
  *
  * Scoped to what Dakota's documentation actually describes. There is no
  * `createCard` here, because Dakota has no card product — a method that exists

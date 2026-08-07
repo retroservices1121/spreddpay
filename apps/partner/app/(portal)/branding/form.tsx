@@ -33,7 +33,7 @@ export function BrandingForm({
 
   // Live preview: the card below re-renders as the colours change, so the
   // operator sees the trader's view before saving.
-  const [productName, setProductName] = useState(branding?.productName ?? "SpreddPay");
+  const [productName, setProductName] = useState(branding?.productName ?? "Spredd Pay");
   const [cardLabel, setCardLabel] = useState(branding?.cardLabel ?? "Payout Card");
   const [primaryColor, setPrimaryColor] = useState(branding?.primaryColor ?? "#111827");
   const [secondaryColor, setSecondaryColor] = useState(branding?.secondaryColor ?? "#6366F1");
@@ -174,7 +174,7 @@ export function BrandingForm({
                 onChange={(event) => setPoweredBy(event.target.checked)}
                 disabled={!canEdit}
               />
-              Show &ldquo;Powered by SpreddPay&rdquo; in the trader app
+              Show &ldquo;Powered by Spredd Pay&rdquo; in the trader app
             </label>
 
             {canEdit ? (

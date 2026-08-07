@@ -28,7 +28,7 @@ export function hexToRgbTriple(hex: string): string {
 
 export const DEFAULT_BRANDING: PartnerBrandingDto = {
   partnerId: "",
-  productName: "SpreddPay",
+  productName: "Spredd Pay",
   logoUrl: null,
   iconUrl: null,
   primaryColor: "#111827",
@@ -69,7 +69,7 @@ export function PoweredBy({ show }: { show: boolean }) {
   if (!show) return null;
   return (
     <p className="text-xs text-ink-subtle">
-      Powered by <span className="font-medium text-ink-muted">SpreddPay</span>
+      Powered by <span className="font-medium text-ink-muted">Spredd Pay</span>
     </p>
   );
 }

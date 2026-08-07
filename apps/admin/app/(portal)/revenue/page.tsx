@@ -31,7 +31,7 @@ export default async function RevenuePage() {
               <li>1. Provider statement imported</li>
               <li>2. Transactions matched</li>
               <li>3. Provider deductions applied</li>
-              <li>4. SpreddPay share calculated</li>
+              <li>4. Spredd Pay share calculated</li>
               <li>5. Partner share calculated</li>
               <li>6. Settlement statement generated</li>
               <li>7. Finance review</li>

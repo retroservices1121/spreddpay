@@ -49,7 +49,7 @@ export default function LoginPage() {
         {/*
           Deliberately unbranded. The trader sees the partner's product, and
           before sign-in we do not know which partner they belong to — so
-          showing SpreddPay's mark here would break the white-label promise at
+          showing Spredd Pay's mark here would break the white-label promise at
           the one screen every trader sees first. The partner's branding takes
           over immediately after authentication.
         */}

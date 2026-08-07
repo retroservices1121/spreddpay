@@ -17,7 +17,7 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   // The trader sees the partner's product, so the title is set per-page from
-  // branding rather than hardcoded to SpreddPay.
+  // branding rather than hardcoded to Spredd Pay.
   title: "Your payout account",
   description: "Receive a payout and make it ready to spend.",
 };

@@ -1,7 +1,7 @@
 /**
  * The Rain adapter surface, per TECHNICAL_README section 10.
  *
- * These are SpreddPay's *normalized* types. They are deliberately not Rain's
+ * These are Spredd Pay's *normalized* types. They are deliberately not Rain's
  * wire format: the sandbox client, once written against Rain's private
  * documentation, maps Rain objects onto these. Nothing here should be taken as
  * a claim about Rain's actual endpoint or field names — those come from the
@@ -33,7 +33,7 @@ export interface CreateRainCustomerInput {
 export interface RainKycSession {
   customerId: string;
   sessionId: string;
-  /** Provider-hosted flow. SpreddPay never collects identity documents itself. */
+  /** Provider-hosted flow. Spredd Pay never collects identity documents itself. */
   hostedUrl: string;
   expiresAt: Date;
 }
@@ -137,7 +137,7 @@ export interface ValidationResult {
 }
 
 export interface ProviderPayoutInput {
-  /** SpreddPay payout id — echoed back so webhooks can be correlated. */
+  /** Spredd Pay payout id — echoed back so webhooks can be correlated. */
   reference: string;
   customerId: string;
   accountId: string;
@@ -172,7 +172,7 @@ export interface VerifiedWebhook {
 }
 
 /**
- * Capabilities Rain has not confirmed for SpreddPay's program are reported here
+ * Capabilities Rain has not confirmed for Spredd Pay's program are reported here
  * rather than faked. Anything listed in docs/rain-program-limitations.md throws
  * `RainCapabilityUnavailableError` in every mode.
  */

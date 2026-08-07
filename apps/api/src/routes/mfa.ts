@@ -15,7 +15,7 @@ import { clientContext, requireAuth } from "../plugins/auth";
 const codeSchema = z.object({ code: z.string().min(6).max(9) });
 
 /**
- * Two-factor authentication for SpreddPay operators.
+ * Two-factor authentication for Spredd Pay operators.
  *
  * The threat this closes: admin.spreddpay.com is publicly reachable and reaches
  * every partner's data. A leaked or reused operator password should not be

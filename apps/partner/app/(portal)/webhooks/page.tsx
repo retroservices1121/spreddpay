@@ -19,7 +19,7 @@ export default async function WebhooksPage() {
     <>
       <PageHeader
         title="Webhooks"
-        description="Events SpreddPay sends to your systems, signed with HMAC-SHA256."
+        description="Events Spredd Pay sends to your systems, signed with HMAC-SHA256."
       />
 
       <div className="max-w-3xl">

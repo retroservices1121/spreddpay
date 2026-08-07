@@ -10,8 +10,8 @@
  *
  * --brand-primary / --brand-secondary are overwritten at runtime with the
  * partner's colours in the trader app. That is the white-label promise: the
- * chrome below stays SpreddPay's, the accents become the partner's. Everything
- * here is therefore neutral except the brand pair, which starts on SpreddPay's
+ * chrome below stays Spredd Pay's, the accents become the partner's. Everything
+ * here is therefore neutral except the brand pair, which starts on Spredd Pay's
  * purple/pink and is expected to be replaced.
  */
 @layer base {

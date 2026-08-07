@@ -9,7 +9,7 @@ section 21 and nothing else — every method throws `BlendNotImplementedError`.
 > TECHNICAL_README section 21: *"Use exact current Blend SDK/API methods. Do not
 > invent methods."*
 
-The method names in `BlendYieldService` are **SpreddPay's own adapter surface**,
+The method names in `BlendYieldService` are **Spredd Pay's own adapter surface**,
 taken from the specification. They are not a claim about Blend's SDK. Whoever
 implements this reads the real method names from Blend's current documentation
 and maps onto them here — the same discipline as the Rain adapter.
@@ -23,7 +23,7 @@ and maps onto them here — the same discipline as the Rain adapter.
 
 ## Capability map
 
-| SpreddPay method | Blend SDK / API | Verified | Notes |
+| Spredd Pay method | Blend SDK / API | Verified | Notes |
 | --- | --- | --- | --- |
 | `getOrCreateAccount` | _unverified_ | ☐ | Blend describes isolated per-user Gnosis Safes. Confirm creation semantics and whether it is idempotent. |
 | `getBalance` | _unverified_ | ☐ | Must return the current APY separately, with its own `asOf`. |
@@ -44,7 +44,7 @@ and maps onto them here — the same discipline as the Rain adapter.
 | Base URL — production | _unverified_ |
 | Organisation identifier semantics (`BLEND_ORGANIZATION_ID`) | _unverified_ |
 | Webhook signature scheme (`BLEND_WEBHOOK_SECRET`) | _unverified_ |
-| Compliance controls Blend applies, and what SpreddPay must apply | _unverified_ |
+| Compliance controls Blend applies, and what Spredd Pay must apply | _unverified_ |
 
 ## Product rules that constrain the implementation
 

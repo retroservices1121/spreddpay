@@ -12,7 +12,7 @@ import type { AppContext } from "../context";
 import { clientContext, requirePlatformUser } from "../plugins/auth";
 import { money, toAuditDto, toPartnerDto, toPayoutDto } from "../mappers";
 
-/** SpreddPay operations API, backing the admin portal in section 15. */
+/** Spredd Pay operations API, backing the admin portal in section 15. */
 export async function registerAdminRoutes(
   app: FastifyInstance,
   context: AppContext,

@@ -16,7 +16,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SpreddPay Operations",
+  title: "Spredd Pay Operations",
   description: "Partner programs, payouts, reconciliation and audit.",
 };
 

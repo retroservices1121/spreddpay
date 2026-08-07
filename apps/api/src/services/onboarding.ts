@@ -2,7 +2,7 @@
  * Trader onboarding — the state machine in TECHNICAL_README section 9, driven
  * against the Rain adapter.
  *
- * SpreddPay stores provider references and statuses. It does not store identity
+ * Spredd Pay stores provider references and statuses. It does not store identity
  * documents: KYC runs in Rain's hosted flow and we keep the session reference
  * and the resulting status, nothing more.
  */

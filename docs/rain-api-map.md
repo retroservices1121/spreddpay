@@ -46,11 +46,11 @@ Per TECHNICAL_README section 10, in this order:
 Each row maps one method of the `RainService` interface
 (`packages/rain/src/types.ts`) onto a real Rain endpoint.
 
-| SpreddPay method | Rain endpoint | Method | Verified | Notes |
+| Spredd Pay method | Rain endpoint | Method | Verified | Notes |
 | --- | --- | --- | --- | --- |
 | `createCustomer` | _unverified_ | | ☐ | |
 | `getCustomer` | _unverified_ | | ☐ | |
-| `startKyc` | _unverified_ | | ☐ | Must be a provider-hosted flow; SpreddPay does not collect identity documents. |
+| `startKyc` | _unverified_ | | ☐ | Must be a provider-hosted flow; Spredd Pay does not collect identity documents. |
 | `getKycStatus` | _unverified_ | | ☐ | |
 | `createAccount` | _unverified_ | | ☐ | |
 | `getAccount` | _unverified_ | | ☐ | |
@@ -67,13 +67,13 @@ Each row maps one method of the `RainService` interface
 
 ## Field normalisation
 
-SpreddPay's normalized types are in `packages/rain/src/types.ts`. They are *not*
+Spredd Pay's normalized types are in `packages/rain/src/types.ts`. They are *not*
 Rain's wire format. Record each mapping here as it is verified.
 
-| SpreddPay field | Rain field | Transform |
+| Spredd Pay field | Rain field | Transform |
 | --- | --- | --- |
 | `NormalizedBalance.availableMinor` | _unverified_ | Must arrive as, or convert to, integer minor units. Never parse a decimal into a float. |
-| `NormalizedCard.status` | _unverified_ | Map onto SpreddPay's `CardStatus`. An unmapped provider status must not default to `ACTIVE`. |
+| `NormalizedCard.status` | _unverified_ | Map onto Spredd Pay's `CardStatus`. An unmapped provider status must not default to `ACTIVE`. |
 | `NormalizedTransaction.kind` | _unverified_ | Map onto `TransactionKind`. Refunds and reversals are separate rows, not edits. |
 
 ## Open questions for Rain
@@ -81,7 +81,7 @@ Rain's wire format. Record each mapping here as it is verified.
 - Does the program support virtual card issuance directly, or via a cardholder
   object created first?
 - Are spending controls settable through the API, and which of the controls
-  SpreddPay models are supported? (Currently `CardControl.providerSynced` stays
+  Spredd Pay models are supported? (Currently `CardControl.providerSynced` stays
   `false` and the UI says so.)
 - Is there a supported secure method for revealing full card details, and does it
   require a hosted iframe?

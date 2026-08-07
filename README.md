@@ -1,14 +1,14 @@
-# SpreddPay
+# Spredd Pay
 
 Multi-tenant B2B platform for funded trading firms. A partner onboards traders,
 delivers approved USDC payouts, issues branded virtual cards, and manages cards,
-transactions and reporting. The trader sees the partner's product; SpreddPay
+transactions and reporting. The trader sees the partner's product; Spredd Pay
 operates the software layer.
 
 > **Phase 1:** receive a USDC payout and make it ready to spend.
 > **Phase 2:** earn on the portion the trader chooses not to spend.
 
-SpreddPay is not a bank, card network, exchange, prop firm, custodian
+Spredd Pay is not a bank, card network, exchange, prop firm, custodian
 independent of its providers, or yield protocol.
 
 **Current state: Phase 1, Milestone 1.** Foundation, portals, payout engine,
@@ -22,7 +22,7 @@ apps/
   landing/    spreddpay.com marketing site (dependency-free, deploys on its own)
   web/        trader-facing white-label app        :3001
   partner/    funded trading firm portal           :3002
-  admin/      SpreddPay operations portal          :3003
+  admin/      Spredd Pay operations portal          :3003
   api/        Fastify API + demo seed              :4000
   worker/     jobs, reconciliation, webhooks
 
@@ -62,7 +62,7 @@ Password for all: `SpreddPayDemo123!`
 | Partner (:3002) | `creator@demotradingfirm.example` | Payout creator |
 | Partner (:3002) | `approver@demotradingfirm.example` | Payout approver |
 | Partner (:3002) | `owner@demotradingfirm.example` | Partner owner |
-| Admin (:3003) | `ops@spreddpay.com` | SpreddPay super admin |
+| Admin (:3003) | `ops@spreddpay.com` | Spredd Pay super admin |
 
 Then follow [`docs/demo-script.md`](./docs/demo-script.md) — the full run is
 under three minutes.

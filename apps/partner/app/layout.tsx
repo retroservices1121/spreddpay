@@ -16,7 +16,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SpreddPay Partner Portal",
+  title: "Spredd Pay Partner Portal",
   description: "Onboard traders, deliver payouts and manage branded cards.",
 };
 

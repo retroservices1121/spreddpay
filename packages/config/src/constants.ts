@@ -1,4 +1,4 @@
-/** Assets SpreddPay understands, with their minor-unit exponent. */
+/** Assets Spredd Pay understands, with their minor-unit exponent. */
 export const ASSET_DECIMALS: Readonly<Record<string, number>> = Object.freeze({
   USDC: 6,
   USD: 2,

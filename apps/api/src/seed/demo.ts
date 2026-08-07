@@ -396,7 +396,7 @@ export async function seedDemo(db: Database): Promise<DemoSeedResult> {
     transactionId: transaction.id,
     logins: [
       {
-        role: "SpreddPay operator (SUPER_ADMIN)",
+        role: "Spredd Pay operator (SUPER_ADMIN)",
         email: "ops@spreddpay.com",
         password: DEMO_PASSWORD,
         portal: "admin",

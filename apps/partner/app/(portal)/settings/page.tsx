@@ -57,7 +57,7 @@ export default async function SettingsPage() {
           </CardHeader>
           <CardBody>
             <Callout tone="neutral">
-              Dual-approval thresholds, daily limits and supported countries are set by SpreddPay
+              Dual-approval thresholds, daily limits and supported countries are set by Spredd Pay
               operations as part of your Rain program. Contact{" "}
               <span className="font-medium">{partner.supportEmail}</span> to request a change.
             </Callout>

@@ -45,7 +45,7 @@ wholesale by whatever Rain actually specifies — not adapted.
 
 ## Event map
 
-| Rain event type | SpreddPay handler | Effect | Verified |
+| Rain event type | Spredd Pay handler | Effect | Verified |
 | --- | --- | --- | --- |
 | _unverified_ | `handleRainEvent` | KYC status change → `advanceOnboarding` | ☐ |
 | _unverified_ | `handleRainEvent` | Account activated → `FinancialAccount.status` | ☐ |
@@ -70,7 +70,7 @@ wholesale by whatever Rain actually specifies — not adapted.
 
 ## Outbound partner webhooks
 
-Distinct from the above. SpreddPay signs its own events to partner endpoints
+Distinct from the above. Spredd Pay signs its own events to partner endpoints
 with HMAC-SHA256 over `${timestamp}.${body}`, with a five-minute replay window,
 exponential backoff to a six-hour ceiling, and a delivery log. See
 `packages/notifications/src/index.ts` and the event list in

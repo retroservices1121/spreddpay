@@ -222,7 +222,7 @@ export async function recordCardRefund(
 }
 
 /**
- * revenue.recognized — split realized revenue between SpreddPay and the partner.
+ * revenue.recognized — split realized revenue between Spredd Pay and the partner.
  * Estimated or unrealized yield never reaches this recipe.
  */
 export async function recordRevenueRecognized(
@@ -265,7 +265,7 @@ export async function recordRevenueRecognized(
   }
   if (residual > 0n) {
     // Anything not allocated by a revenue rule stays in provider fees rather
-    // than silently inflating SpreddPay's share.
+    // than silently inflating Spredd Pay's share.
     postings.push({
       account: "PROVIDER_FEES",
       direction: "CREDIT",

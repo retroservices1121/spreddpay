@@ -55,7 +55,7 @@ export function OpsShell({
 
   return (
     <AppShell
-      productName="SpreddPay Ops"
+      productName="Spredd Pay Ops"
       useSpreddPayMark
       sections={SECTIONS}
       currentPath={pathname}

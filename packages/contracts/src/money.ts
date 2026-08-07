@@ -1,7 +1,7 @@
 /**
  * Exact money arithmetic.
  *
- * Every financial value in SpreddPay is a bigint count of minor units (USDC has
+ * Every financial value in Spredd Pay is a bigint count of minor units (USDC has
  * six). Nothing in this file converts to `number` for arithmetic — IEEE-754
  * cannot represent 4850.10 exactly, and a payout engine that rounds is a payout
  * engine that loses money.

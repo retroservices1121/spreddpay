@@ -241,7 +241,7 @@ export const LEDGER_ACCOUNT_TYPE_BY_CODE: Readonly<
 
 // ------------------------------------------------------------------ webhooks
 
-/** Events SpreddPay emits to partner webhook endpoints. */
+/** Events Spredd Pay emits to partner webhook endpoints. */
 export const PARTNER_WEBHOOK_EVENTS = [
   "trader.created",
   "trader.kyc_pending",

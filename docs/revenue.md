@@ -37,7 +37,7 @@ Only **realized** revenue is recognised. `RevenueEvent.realized` exists to make
 that explicit, and TECHNICAL_README section 24 is direct about the Phase 2 case:
 estimated or unrealized yield is never treated as settled revenue.
 
-A `RevenueEvent` records gross, provider fee, net, and the SpreddPay and partner
+A `RevenueEvent` records gross, provider fee, net, and the Spredd Pay and partner
 shares — all in minor units, all as `BigInt`.
 
 ## Workflow
@@ -46,7 +46,7 @@ shares — all in minor units, all as `BigInt`.
 Provider statement imported
   → transactions matched
   → provider deductions applied
-  → SpreddPay share calculated
+  → Spredd Pay share calculated
   → partner share calculated
   → settlement statement generated
   → finance review

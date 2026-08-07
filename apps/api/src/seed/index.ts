@@ -4,7 +4,7 @@ import { seedDemo } from "./demo";
 async function main(): Promise<void> {
   const result = await seedDemo(db);
 
-  console.log("\nSpreddPay demo data seeded.\n");
+  console.log("\nSpredd Pay demo data seeded.\n");
   console.log(`  Partner     ${result.partnerId}`);
   console.log(`  Trader      ${result.traderId}`);
   console.log(`  Card        ${result.cardId}`);

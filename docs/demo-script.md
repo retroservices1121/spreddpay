@@ -30,7 +30,7 @@ card transaction.
 **0:00 — The firm and its brand.** Partner portal → **Branding**. Point out that
 this is one deployment serving every tenant: the product name, colours and card
 label are the partner's, and the live card preview updates as you change them.
-The trader never sees SpreddPay unless the partner wants them to.
+The trader never sees Spredd Pay unless the partner wants them to.
 
 **0:20 — The traders.** → **Traders**. Alex Morgan is `VIRTUAL_CARD_ACTIVE`. Open
 the record: the onboarding trail runs INVITED → … → VIRTUAL_CARD_ACTIVE, each
@@ -61,7 +61,7 @@ the UI.
 shows two named people.
 
 **2:00 — The trader's view.** Switch to the trader tab → **Home**. The balance
-reflects the payout, and the branded card is on screen — Demo Pay, not SpreddPay.
+reflects the payout, and the branded card is on screen — Demo Pay, not Spredd Pay.
 
 **2:20 — The card.** → **Card**. **Freeze card**; the card greys out and the
 status badge flips. Unfreeze it. Note what is *not* on screen: no full card

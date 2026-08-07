@@ -2,7 +2,7 @@
  * Card issuance and controls.
  *
  * The invariant this file protects: full PAN, CVV and provider tokens never
- * enter SpreddPay's database, logs or API responses. What is stored is the
+ * enter Spredd Pay's database, logs or API responses. What is stored is the
  * provider card id, the last four digits and the expiry — enough to render a
  * card and reconcile a transaction, and nothing that is worth stealing.
  */

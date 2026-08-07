@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "./cn";
 
 /**
- * The SpreddPay mark, transcribed from the landing page at spreddpay.com so the
+ * The Spredd Pay mark, transcribed from the landing page at spreddpay.com so the
  * portals and the marketing site are demonstrably the same product rather than
  * two approximations of it.
  *
@@ -15,7 +15,7 @@ export function SpreddPayMark({
   className,
   /** Colour of the cut-out bars. Defaults to the page background. */
   cutout = "#0b0b10",
-  title = "SpreddPay",
+  title = "Spredd Pay",
 }: {
   size?: number;
   className?: string;
@@ -54,7 +54,7 @@ export function SpreddPayMark({
 export function SpreddPayLogo({
   size = 28,
   showWordmark = true,
-  wordmark = "SpreddPay",
+  wordmark = "Spredd Pay",
   suffix,
   className,
 }: {

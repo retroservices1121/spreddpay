@@ -37,7 +37,7 @@ export default function LoginPage() {
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Could not reach the SpreddPay API.");
+      setError("Could not reach the Spredd Pay API.");
     } finally {
       setPending(false);
     }
@@ -49,7 +49,7 @@ export default function LoginPage() {
         <div className="mb-8 flex flex-col items-center text-center">
           <SpreddPayLogo size={40} showWordmark={false} className="mb-4" />
           <h1 className="text-lg font-semibold tracking-tight text-ink">
-            SpreddPay <span className="font-normal text-ink-subtle">Partner</span>
+            Spredd Pay <span className="font-normal text-ink-subtle">Partner</span>
           </h1>
           <p className="mt-1 text-sm text-ink-muted">Sign in to manage traders and payouts.</p>
         </div>

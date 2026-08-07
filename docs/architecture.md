@@ -4,7 +4,7 @@
 
 ```text
 Partner Portal (:3002) ─┐
-Trader Portal  (:3001) ─┼─> SpreddPay API (:4000) ─> PostgreSQL / Redis / Worker
+Trader Portal  (:3001) ─┼─> Spredd Pay API (:4000) ─> PostgreSQL / Redis / Worker
 Admin Portal   (:3003) ─┘                             |
                                                       ├─> Rain APIs
                                                       └─> Blend APIs (Phase 2)
@@ -19,7 +19,7 @@ design and deploys independently of the platform.
 | --- | --- |
 | Rain account, card, balance, transaction state | Rain |
 | Blend account and yield state (Phase 2) | Blend |
-| Tenancy, partner workflow, approvals, internal reporting, revenue allocation, audit history | SpreddPay |
+| Tenancy, partner workflow, approvals, internal reporting, revenue allocation, audit history | Spredd Pay |
 
 The internal ledger is for workflow and reporting. It is reconciled against
 provider balances; it never replaces them, and it makes no custody claim.

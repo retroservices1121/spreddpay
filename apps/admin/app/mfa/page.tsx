@@ -109,7 +109,7 @@ export default function MfaPage() {
               <Callout tone="caution" title="This is not an operator account">
                 You are signed in as <span className="font-medium">{state.email}</span>, which is a{" "}
                 {state.kind === "TRADER" ? "trader" : "partner"} account. The operations portal
-                needs a SpreddPay operator account.
+                needs a Spredd Pay operator account.
               </Callout>
               <div className="mt-4 flex gap-2">
                 <Button onClick={signOut}>Sign out and use an operator account</Button>

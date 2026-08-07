@@ -54,7 +54,7 @@ export interface AdminSession {
   user: SessionUserDto;
 }
 
-/** SpreddPay operators only. */
+/** Spredd Pay operators only. */
 export async function requireOperator(): Promise<AdminSession> {
   let session: AdminSession;
   try {

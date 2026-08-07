@@ -17,7 +17,7 @@ export class ApiError extends Error {
 }
 
 /**
- * Server-side fetch against the SpreddPay API with the caller's session cookie
+ * Server-side fetch against the Spredd Pay API with the caller's session cookie
  * forwarded. Every page in this portal reads through here, so there is exactly
  * one place that decides what an unauthenticated response means.
  */

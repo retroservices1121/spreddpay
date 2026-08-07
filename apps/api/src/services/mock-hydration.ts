@@ -1,5 +1,5 @@
 /**
- * Replay SpreddPay's own provider references back into the mock Rain service at
+ * Replay Spredd Pay's own provider references back into the mock Rain service at
  * boot.
  *
  * In `mock` mode the adapter's state lives in memory, so after a restart it

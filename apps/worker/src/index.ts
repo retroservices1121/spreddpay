@@ -1,5 +1,5 @@
 /**
- * SpreddPay worker.
+ * Spredd Pay worker.
  *
  * With REDIS_URL set it runs the jobs on BullMQ repeatable schedules. Without
  * it, it falls back to an in-process interval loop — which is what makes the

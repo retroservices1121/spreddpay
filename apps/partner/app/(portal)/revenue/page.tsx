@@ -45,7 +45,7 @@ export default async function RevenuePage() {
     <>
       <PageHeader
         title="Revenue"
-        description="Realized revenue split between SpreddPay and your firm."
+        description="Realized revenue split between Spredd Pay and your firm."
       />
 
       <div className="mb-6">
@@ -57,7 +57,7 @@ export default async function RevenuePage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Stat label="Gross" value={revenue.totals.gross.display} />
-        <Stat label="SpreddPay share" value={revenue.totals.spreddPay.display} />
+        <Stat label="Spredd Pay share" value={revenue.totals.spreddPay.display} />
         <Stat label="Your share" value={revenue.totals.partner.display} tone="positive" />
       </div>
 
@@ -69,7 +69,7 @@ export default async function RevenuePage() {
           {revenue.rules.length === 0 ? (
             <EmptyState
               title="No revenue rules configured"
-              description="Rules are set by SpreddPay operations once commercial terms are agreed."
+              description="Rules are set by Spredd Pay operations once commercial terms are agreed."
             />
           ) : (
             <Table>
@@ -77,7 +77,7 @@ export default async function RevenuePage() {
                 <tr>
                   <Th>Source</Th>
                   <Th>Calculation</Th>
-                  <Th className="text-right">SpreddPay</Th>
+                  <Th className="text-right">Spredd Pay</Th>
                   <Th className="text-right">Partner</Th>
                   <Th>Effective</Th>
                 </tr>
@@ -121,7 +121,7 @@ export default async function RevenuePage() {
               <tr>
                 <Th>Source</Th>
                 <Th className="text-right">Gross</Th>
-                <Th className="text-right">SpreddPay</Th>
+                <Th className="text-right">Spredd Pay</Th>
                 <Th className="text-right">Partner</Th>
                 <Th>Occurred</Th>
               </tr>

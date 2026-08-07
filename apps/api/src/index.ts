@@ -24,11 +24,11 @@ async function main(): Promise<void> {
   await app.listen({ port: context.env.PORT, host: "0.0.0.0" });
   app.log.info(
     { rainMode: context.env.RAIN_MODE, blendMode: context.env.BLEND_MODE },
-    "SpreddPay API ready",
+    "Spredd Pay API ready",
   );
 }
 
 main().catch((error) => {
-  console.error("Failed to start SpreddPay API:", error);
+  console.error("Failed to start Spredd Pay API:", error);
   process.exit(1);
 });
