@@ -9,27 +9,42 @@ Postgres. They cannot be combined into one service.
 Keeping them in the same project is what lets them reach Postgres over Railway's
 private network (`postgres.railway.internal`) instead of the public proxy.
 
-| Service | Root directory | Build command | Start command | Public domain |
-| --- | --- | --- | --- | --- |
-| **landing** *(exists)* | `apps/landing` | — | `npm start` | `spreddpay.com` |
-| **api** | `/` | `pnpm install && pnpm db:generate && pnpm --filter @spreddpay/api build` | `pnpm --filter @spreddpay/api start` | `api.spreddpay.com` |
-| **web** (trader) | `/` | `pnpm install && pnpm db:generate && pnpm --filter @spreddpay/web build` | `pnpm --filter @spreddpay/web start` | `app.spreddpay.com` |
-| **partner** | `/` | `pnpm install && pnpm db:generate && pnpm --filter @spreddpay/partner-portal build` | `pnpm --filter @spreddpay/partner-portal start` | `partner.spreddpay.com` |
-| **admin** | `/` | `pnpm install && pnpm db:generate && pnpm --filter @spreddpay/admin build` | `pnpm --filter @spreddpay/admin start` | `admin.spreddpay.com` |
-| **worker** | `/` | `pnpm install && pnpm db:generate && pnpm --filter @spreddpay/worker build` | `pnpm --filter @spreddpay/worker start` | none |
-| **Postgres** | — | — | — | — |
+| Service | Build | Public domain |
+| --- | --- | --- |
+| **landing** *(exists)* | Nixpacks, root directory `apps/landing` | `spreddpay.com` |
+| **api** | `RAILWAY_DOCKERFILE_PATH=docker/api.Dockerfile` | `api.spreddpay.com` |
+| **web** (trader) | `RAILWAY_DOCKERFILE_PATH=docker/web.Dockerfile` | `app.spreddpay.com` |
+| **partner** | `RAILWAY_DOCKERFILE_PATH=docker/partner.Dockerfile` | `partner.spreddpay.com` |
+| **admin** | `RAILWAY_DOCKERFILE_PATH=docker/admin.Dockerfile` | `admin.spreddpay.com` |
+| **worker** | `RAILWAY_DOCKERFILE_PATH=docker/worker.Dockerfile` | none |
+| **Postgres** | — | — |
 
 Notes on the table:
 
-- **landing is the exception.** Its root directory is `apps/landing`, it has zero
-  dependencies and no build step. That is deliberate: spreddpay.com cannot be
-  taken down by a platform build failure.
-- **Everything else uses `/` as the root directory,** because pnpm workspace
-  resolution needs the lockfile and `pnpm-workspace.yaml` at the repo root. The
-  `--filter` in the build and start commands is what selects the app.
-- **`pnpm db:generate` is required in every platform build.** The Prisma client
-  is generated, not committed.
+- **The five platform services are configured entirely by variables.** Root
+  directory stays at the repo default and there are no build or start commands
+  to set in the dashboard — `RAILWAY_DOCKERFILE_PATH` is an ordinary service
+  variable, so the whole setup is reproducible and lives in git.
+- **Root directory must stay `/` for those five.** pnpm workspace resolution
+  needs `pnpm-lock.yaml` and `pnpm-workspace.yaml` at the build context root.
+  Setting a subdirectory breaks the install.
+- **landing is the exception.** Root directory `apps/landing`, Nixpacks, zero
+  dependencies, no Dockerfile. Deliberate: spreddpay.com cannot be taken down by
+  a platform build failure.
 - **The worker needs no domain.** It has no HTTP surface.
+
+### Why single-stage Dockerfiles
+
+pnpm's isolated `node_modules` layout spreads symlinks across the workspace root
+and every package. Copying a dependency stage between images is fragile in that
+layout, so each Dockerfile installs, generates the Prisma client and builds in
+one stage. The images are larger than a hand-tuned multi-stage build; that is an
+accepted trade for a first deployment. `.dockerignore` keeps the build context
+small.
+
+`prisma generate` needs *a* `DATABASE_URL` to parse the datasource block even
+though it never connects, so the build layer supplies a placeholder. The real
+one is injected by Railway at runtime.
 
 ## Ports
 
@@ -66,6 +81,12 @@ private-network URL, which is what you want between services in a project.
 webhook secrets become undecryptable otherwise. `AUTH_SECRET` likewise, or
 sessions issued by one service will not validate in another.
 
+### Additionally on each service
+
+```env
+RAILWAY_DOCKERFILE_PATH=docker/<service>.Dockerfile
+```
+
 ### Additionally on web, partner and admin
 
 ```env
@@ -73,7 +94,8 @@ NEXT_PUBLIC_API_URL=https://api.spreddpay.com
 ```
 
 **This is read at build time**, not at runtime — Next.js inlines `NEXT_PUBLIC_*`
-into the bundle. Set it before the first build, and redeploy after changing it.
+into the bundle. The Dockerfiles declare it as an `ARG` so Railway's build args
+reach the compiler. Changing it needs a **rebuild**, not a restart.
 
 ### Optionally on api and worker
 
