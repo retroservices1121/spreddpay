@@ -10,4 +10,8 @@ export default defineConfig({
   sourcemap: true,
   dts: false,
   noExternal: [/^@spreddpay\//],
+  // See apps/api/tsup.config.ts: Prisma's CJS runtime cannot be bundled into
+  // ESM. bullmq and ioredis are the worker's own dependencies and tsup
+  // externalises those automatically.
+  external: ["@prisma/client", ".prisma/client", "@prisma/engines"],
 });

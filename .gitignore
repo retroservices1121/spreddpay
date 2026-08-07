@@ -28,3 +28,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# Scratch API responses — write these to the scratchpad, not the repo.
+/*.json.tmp
+/deps.json
+/inst.json
+/proj.json

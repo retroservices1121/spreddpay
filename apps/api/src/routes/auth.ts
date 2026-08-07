@@ -18,7 +18,10 @@ import { toSessionUserDto } from "../mappers";
 export async function registerAuthRoutes(app: FastifyInstance, context: AppContext): Promise<void> {
   const cookieOptions = {
     httpOnly: true,
-    sameSite: "lax" as const,
+    // Defaults to lax. Set SESSION_COOKIE_SAMESITE=none when the portals and
+    // the API are on different registrable domains — Railway's generated
+    // *.up.railway.app hostnames are, and a Lax cookie would never be sent.
+    sameSite: context.env.SESSION_COOKIE_SAMESITE,
     secure: context.env.NODE_ENV === "production",
     path: "/",
     maxAge: SESSION_TTL_SECONDS,

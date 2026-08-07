@@ -38,6 +38,20 @@ export const serverEnvSchema = z
     PORT: z.coerce.number().int().positive().default(4000),
 
     AUTH_SECRET: z.string().min(32, "AUTH_SECRET must be at least 32 characters"),
+    /**
+     * Session cookie SameSite policy.
+     *
+     * `lax` is correct — and the default — when the portals and the API share a
+     * registrable domain (app.spreddpay.com ↔ api.spreddpay.com). Railway's
+     * generated *.up.railway.app hostnames do not: `up.railway.app` is on the
+     * Public Suffix List, so those are cross-*site* and a Lax cookie is never
+     * sent, which silently breaks login. Such a deployment needs `none`.
+     *
+     * `none` requires Secure, so it is only permitted over HTTPS. Cross-site
+     * request forgery is then held off by the CORS allow-list plus the JSON
+     * content type, which forces a preflight.
+     */
+    SESSION_COOKIE_SAMESITE: z.enum(["lax", "none", "strict"]).default("lax"),
     ENCRYPTION_KEY: z
       .string()
       .regex(/^[0-9a-fA-F]{64}$/, "ENCRYPTION_KEY must be 64 hex characters (32 bytes)"),
@@ -74,6 +88,16 @@ export const serverEnvSchema = z
         code: "custom",
         path: ["BLEND_MODE"],
         message: "BLEND_MODE=production is disabled until Phase 2 commercial terms are approved.",
+      });
+    }
+    // SameSite=None is meaningless without Secure, and browsers drop such a
+    // cookie outright. Fail at boot rather than at every login.
+    if (env.SESSION_COOKIE_SAMESITE === "none" && env.NODE_ENV !== "production") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["SESSION_COOKIE_SAMESITE"],
+        message:
+          "SESSION_COOKIE_SAMESITE=none requires a Secure cookie, which is only set when NODE_ENV=production. Use lax for local development.",
       });
     }
     if (env.RAIN_MODE === "sandbox") {

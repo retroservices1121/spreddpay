@@ -12,6 +12,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@spreddpay/auth": "workspace:*",
     "@spreddpay/config": "workspace:*",
     "@spreddpay/contracts": "workspace:*",
