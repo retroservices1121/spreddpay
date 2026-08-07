@@ -1,0 +1,34 @@
+{
+  "name": "@spreddpay/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@spreddpay/auth": "workspace:*",
+    "@spreddpay/config": "workspace:*",
+    "@spreddpay/contracts": "workspace:*",
+    "@spreddpay/db": "workspace:*",
+    "@spreddpay/ledger": "workspace:*",
+    "@spreddpay/notifications": "workspace:*",
+    "@spreddpay/rain": "workspace:*",
+    "bullmq": "^5.81.3",
+    "ioredis": "^5.11.1",
+    "pino": "^10.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "dotenv-cli": "^8.0.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.23.9",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

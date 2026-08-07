@@ -1,0 +1,160 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Mirrors .env.example. Development-only values — the real ones live in
+  # Railway and GitHub secrets, and nothing here reaches a provider.
+  NODE_ENV: test
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/spreddpay_test
+  APP_URL: http://localhost:3001
+  PARTNER_APP_URL: http://localhost:3002
+  ADMIN_APP_URL: http://localhost:3003
+  API_URL: http://localhost:4000
+  NEXT_PUBLIC_API_URL: http://localhost:4000
+  AUTH_SECRET: ci_only_auth_secret_not_used_anywhere_real_0000
+  ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+  RAIN_MODE: mock
+  BLEND_MODE: mock
+  DEMO_SEED: "false"
+
+jobs:
+  verify:
+    name: lint · typecheck · test · build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: spreddpay_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Write .env
+        # Package scripts load .env via dotenv-cli; CI values come from `env`.
+        run: |
+          cat > .env <<'EOF'
+          NODE_ENV=test
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/spreddpay_test
+          REDIS_URL=
+          APP_URL=http://localhost:3001
+          PARTNER_APP_URL=http://localhost:3002
+          ADMIN_APP_URL=http://localhost:3003
+          API_URL=http://localhost:4000
+          NEXT_PUBLIC_API_URL=http://localhost:4000
+          AUTH_SECRET=ci_only_auth_secret_not_used_anywhere_real_0000
+          ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
+          RAIN_MODE=mock
+          BLEND_MODE=mock
+          DEMO_SEED=false
+          EOF
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Apply schema
+        run: pnpm db:push
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  seed:
+    name: demo seed
+    runs-on: ubuntu-latest
+    needs: verify
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: spreddpay_demo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Write .env
+        run: |
+          cat > .env <<'EOF'
+          NODE_ENV=development
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/spreddpay_demo
+          REDIS_URL=
+          APP_URL=http://localhost:3001
+          PARTNER_APP_URL=http://localhost:3002
+          ADMIN_APP_URL=http://localhost:3003
+          API_URL=http://localhost:4000
+          NEXT_PUBLIC_API_URL=http://localhost:4000
+          AUTH_SECRET=ci_only_auth_secret_not_used_anywhere_real_0000
+          ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
+          RAIN_MODE=mock
+          BLEND_MODE=mock
+          DEMO_SEED=true
+          EOF
+
+      - run: pnpm db:generate
+      - run: pnpm db:push
+
+      # Proves the demo is reproducible: reset twice, and the second run must
+      # succeed against an already-seeded database.
+      - name: Reset demo data
+        run: pnpm demo:reset
+
+      - name: Reset again (idempotency check)
+        run: pnpm demo:reset
