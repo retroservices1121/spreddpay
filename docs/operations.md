@@ -53,14 +53,48 @@ recreating.
 
 ## Worker jobs
 
-| Job | Interval | Purpose |
-| --- | --- | --- |
-| `process-webhook-events` | 5s | Process stored provider events |
-| `deliver-partner-webhooks` | 10s | Deliver outbound webhooks with backoff |
-| `dispatch-notifications` | 15s | Send queued notifications |
-| `sync-provider-balances` | 60s | Snapshot provider balances |
-| `reconcile-ledgers` | 5m | Assert every partner's books balance |
-| `sweep-expired` | 1h | Purge expired sessions and idempotency keys |
+| Job | Interval | Purpose | Safe on >1 replica |
+| --- | --- | --- | --- |
+| `process-webhook-events` | 5s | Process stored provider events | yes — atomic claim |
+| `deliver-partner-webhooks` | 10s | Deliver outbound webhooks with backoff | yes — lease |
+| `dispatch-notifications` | 15s | Send queued notifications | yes — atomic claim |
+| `sync-provider-balances` | 60s | Snapshot provider balances | yes — duplicate snapshots are harmless |
+| `reconcile-ledgers` | 5m | Assert every partner's books balance | yes — read-only |
+| `sweep-expired` | 1h | Purge expired sessions and idempotency keys | yes — idempotent |
+
+### Scaling the worker
+
+The three queue jobs claim work atomically with
+`SELECT … FOR UPDATE SKIP LOCKED`, so concurrent workers receive disjoint sets
+of rows in a single statement. Scaling `numReplicas` above 1 is therefore safe.
+
+This matters because the obvious implementation is not. A `findMany` followed by
+an `update` leaves a window in which a second replica reads the same rows, and
+the result is duplicate webhook processing and the same event POSTed to a
+partner twice. `apps/worker/src/jobs.test.ts` asserts the disjointness property
+against a real database.
+
+`deliver-partner-webhooks` has no status column, so it claims by pushing
+`nextAttemptAt` two minutes out — a lease. If a worker dies mid-delivery the
+lease expires and the row is retried, rather than being stranded.
+
+`dispatch-notifications` marks `SENT` inside the claim. That is honest while
+there is no email transport — claiming *is* sending. Wiring in a real provider
+needs an intermediate `SENDING` state so a crash between claim and send is
+retried rather than silently dropped.
+
+### Resource limits
+
+Railway's per-service vCPU and memory figures are **ceilings, not
+reservations**, and billing follows actual consumption. Lowering them saves
+nothing and only risks throttling or an OOM kill, so leave them at the default.
+Steady-state footprints are small: roughly 200–300 MB for the API, 150–250 MB
+for the worker, and 250–400 MB for each Next.js portal. Next.js *builds* can
+spike to several GB, but those run on Railway's builder infrastructure and are
+unaffected by runtime limits.
+
+Watch the Metrics tab instead. Memory that climbs steadily is a leak to fix, not
+a limit to raise.
 
 ## Alerting — what to watch
 

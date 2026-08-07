@@ -25,23 +25,45 @@ export interface JobDeps {
  * and every downstream write is itself idempotent, so replaying an event is a
  * no-op rather than a double posting.
  */
+/**
+ * Atomically claim a batch of webhook events.
+ *
+ * A `findMany` followed by an `update` leaves a window in which a second worker
+ * reads the same rows, so two replicas would process — and therefore
+ * double-post — the same event. `FOR UPDATE SKIP LOCKED` hands each caller a
+ * disjoint set in a single statement, which is what makes this job safe on more
+ * than one replica.
+ *
+ * Exported so the tests can assert the disjointness property directly rather
+ * than inferring it from a count.
+ */
+export async function claimWebhookEvents(
+  deps: JobDeps,
+  limit: number,
+): Promise<{ id: string; eventType: string; payload: Record<string, unknown> }[]> {
+  return deps.db.$queryRaw`
+    UPDATE "WebhookEvent"
+    SET status = 'PROCESSING'::"WebhookEventStatus", attempts = attempts + 1
+    WHERE id IN (
+      SELECT id FROM "WebhookEvent"
+      WHERE status = 'RECEIVED'::"WebhookEventStatus"
+        AND "signatureValid" = true
+      ORDER BY "receivedAt" ASC
+      LIMIT ${limit}
+      FOR UPDATE SKIP LOCKED
+    )
+    RETURNING id, "eventType", payload
+  `;
+}
+
 export async function processWebhookEvents(deps: JobDeps, limit = 50): Promise<number> {
-  const events = await deps.db.webhookEvent.findMany({
-    where: { status: "RECEIVED", signatureValid: true },
-    orderBy: { receivedAt: "asc" },
-    take: limit,
-  });
+  const events = await claimWebhookEvents(deps, limit);
 
   let processed = 0;
 
   for (const event of events) {
-    await deps.db.webhookEvent.update({
-      where: { id: event.id },
-      data: { status: "PROCESSING", attempts: { increment: 1 } },
-    });
-
     try {
-      await handleRainEvent(deps, event.eventType, event.payload as Record<string, unknown>);
+      await handleRainEvent(deps, event.eventType, event.payload);
       await deps.db.webhookEvent.update({
         where: { id: event.id },
         data: { status: "PROCESSED", processedAt: new Date(), lastError: null },
@@ -87,15 +109,29 @@ async function handleRainEvent(
 
 /** Deliver queued partner webhooks with exponential backoff. */
 export async function deliverPartnerWebhooks(deps: JobDeps, limit = 25): Promise<number> {
-  const due = await deps.db.partnerWebhookDelivery.findMany({
-    where: {
-      deliveredAt: null,
-      attempts: { lt: 8 },
-      OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: new Date() } }],
-    },
-    orderBy: { createdAt: "asc" },
-    take: limit,
-  });
+  /**
+   * Claim by lease. There is no status column to flip here, so the claim pushes
+   * `nextAttemptAt` two minutes out: the row stops being due, no other replica
+   * picks it up, and if this worker dies mid-flight the lease simply expires and
+   * the delivery is retried. Without this, two replicas would both POST the
+   * same event to the partner.
+   *
+   * The lease is deliberately longer than the 10s request timeout below.
+   */
+  const due = await deps.db.$queryRaw<{ id: string; attempts: number }[]>`
+    UPDATE "PartnerWebhookDelivery"
+    SET "nextAttemptAt" = now() + interval '2 minutes'
+    WHERE id IN (
+      SELECT id FROM "PartnerWebhookDelivery"
+      WHERE "deliveredAt" IS NULL
+        AND attempts < 8
+        AND ("nextAttemptAt" IS NULL OR "nextAttemptAt" <= now())
+      ORDER BY "createdAt" ASC
+      LIMIT ${limit}
+      FOR UPDATE SKIP LOCKED
+    )
+    RETURNING id, attempts
+  `;
 
   let delivered = 0;
 
@@ -236,22 +272,42 @@ export async function sweepExpired(deps: JobDeps): Promise<{ sessions: number; k
  * Milestone 1 has no email provider wired in, so this marks rows as sent and
  * logs them. The call site is already correct; only the transport changes.
  */
+/** Atomically claim queued notifications. See claimWebhookEvents. */
+export async function claimNotifications(
+  deps: JobDeps,
+  limit: number,
+): Promise<{ id: string; template: string; channel: string }[]> {
+  return deps.db.$queryRaw`
+    UPDATE "Notification"
+    SET status = 'SENT'::"NotificationStatus", "sentAt" = now()
+    WHERE id IN (
+      SELECT id FROM "Notification"
+      WHERE status = 'QUEUED'::"NotificationStatus"
+      ORDER BY "createdAt" ASC
+      LIMIT ${limit}
+      FOR UPDATE SKIP LOCKED
+    )
+    RETURNING id, template, channel
+  `;
+}
+
 export async function dispatchNotifications(deps: JobDeps, limit = 50): Promise<number> {
-  const queued = await deps.db.notification.findMany({
-    where: { status: "QUEUED" },
-    orderBy: { createdAt: "asc" },
-    take: limit,
-  });
+  /**
+   * Claimed the same way as the other queues, so two replicas cannot send the
+   * same notification twice.
+   *
+   * The claim marks SENT in the same statement. That is honest while there is
+   * no transport — claiming *is* sending. Once a real email provider is wired
+   * in this needs an intermediate SENDING state, so a crash between claim and
+   * send is retried rather than silently lost.
+   */
+  const queued = await claimNotifications(deps, limit);
 
   for (const notification of queued) {
     deps.log.info(
       { template: notification.template, channel: notification.channel },
       "notification dispatched (no transport configured)",
     );
-    await deps.db.notification.update({
-      where: { id: notification.id },
-      data: { status: "SENT", sentAt: new Date() },
-    });
   }
 
   return queued.length;

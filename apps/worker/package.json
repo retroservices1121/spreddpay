@@ -9,7 +9,8 @@
     "build": "tsup",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "test:db": "dotenv -e ../../.env -- vitest run"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
