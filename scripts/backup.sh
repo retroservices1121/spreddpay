@@ -21,16 +21,20 @@ set -euo pipefail
 : "${DATABASE_URL:?DATABASE_URL is required}"
 : "${BACKUP_PASSPHRASE:?BACKUP_PASSPHRASE is required — an unencrypted backup of financial data is not acceptable}"
 
+# Debian's /usr/bin/pg_dump is a wrapper that can resolve to an older major
+# than the one just installed. PG_DUMP lets the caller name the binary exactly.
+PG_DUMP="${PG_DUMP:-pg_dump}"
+
 OUT_DIR="${BACKUP_OUT_DIR:-backups}"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 FILE="${OUT_DIR}/spreddpay-${STAMP}.sql.gz.enc"
 
 mkdir -p "$OUT_DIR"
 
-echo "Dumping database…"
+echo "Dumping database with: $("$PG_DUMP" --version)"
 # --no-owner / --no-privileges so the dump restores into a differently-owned
 # database (a fresh Railway instance, or a local one) without role errors.
-pg_dump "$DATABASE_URL" \
+"$PG_DUMP" "$DATABASE_URL" \
   --format=plain \
   --no-owner \
   --no-privileges \
