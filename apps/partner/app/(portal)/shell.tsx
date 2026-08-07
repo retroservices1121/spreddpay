@@ -62,6 +62,7 @@ export function PortalShell({
     <AppShell
       productName={productName}
       logoUrl={logoUrl}
+      useSpreddPayMark
       sections={SECTIONS}
       currentPath={pathname}
       user={{ name: userName, sublabel: userSublabel }}

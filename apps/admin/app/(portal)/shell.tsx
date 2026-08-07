@@ -56,6 +56,7 @@ export function OpsShell({
   return (
     <AppShell
       productName="SpreddPay Ops"
+      useSpreddPayMark
       sections={SECTIONS}
       currentPath={pathname}
       user={{ name: userName, sublabel: userSublabel }}

@@ -46,9 +46,16 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <h1 className="text-lg font-semibold text-ink">Sign in</h1>
-          <p className="mt-1 text-sm text-ink-muted">Access your payout account and card.</p>
+        {/*
+          Deliberately unbranded. The trader sees the partner's product, and
+          before sign-in we do not know which partner they belong to — so
+          showing SpreddPay's mark here would break the white-label promise at
+          the one screen every trader sees first. The partner's branding takes
+          over immediately after authentication.
+        */}
+        <div className="mb-8 text-center">
+          <h1 className="text-lg font-semibold tracking-tight text-ink">Sign in</h1>
+          <p className="mt-1 text-sm text-ink-muted">Access your payout account.</p>
         </div>
 
         <Card>

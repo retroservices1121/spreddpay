@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Callout, Card, CardBody, Field, Input } from "@spreddpay/ui";
+import { Button, Callout, Card, CardBody, Field, Input , SpreddPayLogo } from "@spreddpay/ui";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -47,8 +47,11 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <h1 className="text-lg font-semibold text-ink">SpreddPay Operations</h1>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <SpreddPayLogo size={40} showWordmark={false} className="mb-4" />
+          <h1 className="text-lg font-semibold tracking-tight text-ink">
+            SpreddPay <span className="font-normal text-ink-subtle">Operations</span>
+          </h1>
           <p className="mt-1 text-sm text-ink-muted">Internal access only.</p>
         </div>
 

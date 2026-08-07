@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "./cn";
+import { SpreddPayMark } from "./logo";
 
 export interface NavItem {
   href: string;
@@ -22,6 +23,7 @@ export interface NavSection {
 export function AppShell({
   productName,
   logoUrl,
+  useSpreddPayMark,
   sections,
   currentPath,
   user,
@@ -31,6 +33,8 @@ export function AppShell({
 }: {
   productName: string;
   logoUrl?: string | null;
+  /** Show the SpreddPay mark when no partner logo is set. */
+  useSpreddPayMark?: boolean;
   sections: NavSection[];
   currentPath: string;
   user?: { name: string; sublabel?: string } | null;
@@ -101,7 +105,7 @@ export function AppShell({
         >
           <span aria-hidden>☰</span>
         </button>
-        <Brand productName={productName} logoUrl={logoUrl} />
+        <Brand productName={productName} logoUrl={logoUrl} useSpreddPayMark={useSpreddPayMark} />
       </header>
 
       <div className="lg:flex">
@@ -113,7 +117,7 @@ export function AppShell({
           )}
         >
           <div className="mb-6 hidden lg:block">
-            <Brand productName={productName} logoUrl={logoUrl} />
+            <Brand productName={productName} logoUrl={logoUrl} useSpreddPayMark={useSpreddPayMark} />
           </div>
           {nav}
           <div className="mt-8 border-t border-edge pt-4">
@@ -144,19 +148,37 @@ export function AppShell({
   );
 }
 
-function Brand({ productName, logoUrl }: { productName: string; logoUrl?: string | null }) {
+/**
+ * The header brand.
+ *
+ * Order of preference: the partner's own logo, then the SpreddPay mark, then a
+ * letter tile. The middle case matters for the white-label promise — a partner
+ * portal shows SpreddPay's mark because it *is* SpreddPay's product, while a
+ * trader app that has a partner logo never shows our mark at all.
+ */
+function Brand({
+  productName,
+  logoUrl,
+  useSpreddPayMark,
+}: {
+  productName: string;
+  logoUrl?: string | null;
+  useSpreddPayMark?: boolean;
+}) {
   return (
     <div className="flex items-center gap-2">
       {logoUrl ? (
         // A plain <img>: this package is framework-agnostic, and partner logos
         // are arbitrary remote URLs that next/image would need configuring for.
         <img src={logoUrl} alt="" className="h-7 w-7 rounded-md object-contain" />
+      ) : useSpreddPayMark ? (
+        <SpreddPayMark size={28} cutout="rgb(var(--surface))" />
       ) : (
         <span className="grid h-7 w-7 place-items-center rounded-md bg-brand-primary text-xs font-bold text-white">
           {productName.slice(0, 1).toUpperCase()}
         </span>
       )}
-      <span className="truncate text-sm font-semibold text-ink">{productName}</span>
+      <span className="truncate text-sm font-semibold tracking-tight text-ink">{productName}</span>
     </div>
   );
 }
