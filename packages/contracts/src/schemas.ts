@@ -140,7 +140,15 @@ export const invitePartnerUserRequest = z.object({
   email: z.string().email(),
   firstName: z.string().min(1).max(80),
   lastName: z.string().min(1).max(80),
-  roles: z.array(z.enum(PARTNER_ROLES)).min(1),
+  roles: z.array(z.enum(PARTNER_ROLES)).min(1).max(PARTNER_ROLES.length),
+});
+
+export const updatePartnerUserRolesRequest = z.object({
+  roles: z.array(z.enum(PARTNER_ROLES)).min(1).max(PARTNER_ROLES.length),
+});
+
+export const setPartnerUserStatusRequest = z.object({
+  status: z.enum(["ACTIVE", "SUSPENDED", "DISABLED"]),
 });
 
 // ---------------------------------------------------------------- webhooks
@@ -168,6 +176,8 @@ export type CancelPayoutRequest = z.infer<typeof cancelPayoutRequest>;
 export type IssueCardRequest = z.infer<typeof issueCardRequest>;
 export type UpdateCardControlsRequest = z.infer<typeof updateCardControlsRequest>;
 export type InvitePartnerUserRequest = z.infer<typeof invitePartnerUserRequest>;
+export type UpdatePartnerUserRolesRequest = z.infer<typeof updatePartnerUserRolesRequest>;
+export type SetPartnerUserStatusRequest = z.infer<typeof setPartnerUserStatusRequest>;
 export type ListPayoutsQuery = z.infer<typeof listPayoutsQuery>;
 export type ListTradersQuery = z.infer<typeof listTradersQuery>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuery>;

@@ -110,6 +110,49 @@ export const PLATFORM_ROLE_PERMISSIONS: Readonly<
   READ_ONLY: READ_ONLY_PLATFORM,
 });
 
+/**
+ * Role pairs one user may not hold at once.
+ *
+ * Dual approval compares user ids, so it is defeated by one person holding both
+ * sides: they create a payout and approve it from the same account. Refusing
+ * the combination at assignment time closes that without anyone having to spot
+ * it afterwards.
+ *
+ * It does not stop two colluding accounts — nothing at this layer can. The
+ * audit trail records the actor and IP of both the creation and the approval,
+ * which is where that case is caught.
+ */
+export const INCOMPATIBLE_PARTNER_ROLES: readonly (readonly [
+  PartnerRoleName,
+  PartnerRoleName,
+])[] = Object.freeze([["PAYOUT_CREATOR", "PAYOUT_APPROVER"]]);
+
+export interface RoleConflict {
+  roles: [PartnerRoleName, PartnerRoleName];
+  reason: string;
+}
+
+/**
+ * PARTNER_OWNER is exempt: it holds every permission by definition, so
+ * forbidding the pair there would mean an owner could never approve anything.
+ * An owner approving their own high-value payout is still blocked at approval
+ * time by the self-approval rule.
+ */
+export function findRoleConflict(roles: readonly PartnerRoleName[]): RoleConflict | null {
+  if (roles.includes("PARTNER_OWNER")) return null;
+
+  for (const [a, b] of INCOMPATIBLE_PARTNER_ROLES) {
+    if (roles.includes(a) && roles.includes(b)) {
+      return {
+        roles: [a, b],
+        reason:
+          "One person cannot both create and approve payouts. Dual approval compares users, so holding both roles would let a single account approve its own work.",
+      };
+    }
+  }
+  return null;
+}
+
 export function partnerRolePermissions(
   roles: readonly PartnerRoleName[],
 ): ReadonlySet<PartnerPermission> {
