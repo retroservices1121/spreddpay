@@ -21,7 +21,7 @@ describe("payout state machine", () => {
       "PENDING_APPROVAL",
       "APPROVED",
       "FUNDING_PENDING",
-      "SUBMITTED_TO_RAIN",
+      "SUBMITTED_TO_PROVIDER",
       "PROCESSING",
       "COMPLETED",
     ] as const;
@@ -34,7 +34,7 @@ describe("payout state machine", () => {
   it("refuses to skip approval", () => {
     expect(() => assertPayoutTransition("DRAFT", "APPROVED")).toThrow(InvalidTransitionError);
     expect(() => assertPayoutTransition("DRAFT", "COMPLETED")).toThrow(InvalidTransitionError);
-    expect(() => assertPayoutTransition("PENDING_APPROVAL", "SUBMITTED_TO_RAIN")).toThrow(
+    expect(() => assertPayoutTransition("PENDING_APPROVAL", "SUBMITTED_TO_PROVIDER")).toThrow(
       InvalidTransitionError,
     );
   });
@@ -88,7 +88,7 @@ describe("trader onboarding state machine", () => {
   });
 
   it("cannot skip KYC to reach an account", () => {
-    expect(() => assertTraderTransition("INVITED", "RAIN_ACCOUNT_ACTIVE")).toThrow(
+    expect(() => assertTraderTransition("INVITED", "PROVIDER_ACCOUNT_ACTIVE")).toThrow(
       InvalidTransitionError,
     );
     expect(() => assertTraderTransition("TERMS_PENDING", "KYC_APPROVED")).toThrow(
@@ -103,7 +103,7 @@ describe("trader onboarding state machine", () => {
   });
 
   it("only lets a trader receive a payout once Rain holds an active account", () => {
-    expect(traderCanReceivePayout("RAIN_ACCOUNT_ACTIVE")).toBe(true);
+    expect(traderCanReceivePayout("PROVIDER_ACCOUNT_ACTIVE")).toBe(true);
     expect(traderCanReceivePayout("VIRTUAL_CARD_ACTIVE")).toBe(true);
 
     for (const status of [

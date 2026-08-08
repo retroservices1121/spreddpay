@@ -27,6 +27,7 @@ import {
 import { recordAudit, type Database } from "@spreddpay/db";
 import { assertNotSelfApproval, requirePermission, type Principal } from "@spreddpay/auth";
 import {
+  accountBalance,
   recordPayoutApproved,
   recordPayoutCompleted,
   recordPayoutFailed,
@@ -61,7 +62,7 @@ async function loadProgram(db: Database, partnerId: string) {
   });
   if (!program) {
     throw AppError.conflict(
-      "This partner has no active Rain program configuration. Configure limits before creating payouts.",
+      "This partner has no active provider program configuration. Configure limits before creating payouts.",
     );
   }
   return program;
@@ -79,7 +80,7 @@ async function dailyVolumeMinor(db: Database, partnerId: string): Promise<bigint
           "PENDING_APPROVAL",
           "APPROVED",
           "FUNDING_PENDING",
-          "SUBMITTED_TO_RAIN",
+          "SUBMITTED_TO_PROVIDER",
           "PROCESSING",
           "COMPLETED",
         ],
@@ -121,7 +122,7 @@ export async function createPayout(
   if (!traderCanReceivePayout(trader.status)) {
     throw new AppError(
       "TRADER_NOT_ELIGIBLE",
-      `Trader is ${trader.status}; a payout requires an active Rain account.`,
+      `Trader is ${trader.status}; a payout requires an active provider account.`,
     );
   }
 
@@ -391,7 +392,7 @@ export async function cancelPayout(
 }
 
 /**
- * Hand an approved payout to Rain.
+ * Hand an approved payout to the provider.
  *
  * TECHNICAL_README section 13 is explicit that the movement architecture is not
  * to be assumed. In `mock` mode this runs the demo flow end to end. In
@@ -411,7 +412,7 @@ export async function submitPayout(
   });
   if (!payout) throw AppError.notFound("Payout not found.");
 
-  assertPayoutTransition(payout.status, "SUBMITTED_TO_RAIN");
+  assertPayoutTransition(payout.status, "SUBMITTED_TO_PROVIDER");
 
   const account = await deps.db.financialAccount.findFirst({
     where: { partnerId: input.partnerId, traderId: payout.traderId, provider: "RAIN" },
@@ -419,7 +420,7 @@ export async function submitPayout(
   if (!account || !payout.trader.rainCustomerId) {
     throw new AppError(
       "TRADER_NOT_ELIGIBLE",
-      "The trader has no Rain account to receive this payout.",
+      "The trader has no provider account to receive this payout.",
     );
   }
 
@@ -438,7 +439,7 @@ export async function submitPayout(
       const updated = await tx.payout.update({
         where: { id: payout.id },
         data: {
-          status: "SUBMITTED_TO_RAIN",
+          status: "SUBMITTED_TO_PROVIDER",
           rainTransferId: providerPayout.id,
           blockchainTxHash: providerPayout.txHash,
           submittedAt: new Date(),
@@ -467,7 +468,7 @@ export async function submitPayout(
         action: "payout.submitted",
         entityType: "Payout",
         entityId: payout.id,
-        summary: `Submitted payout ${payout.externalReference} to Rain`,
+        summary: `Submitted payout ${payout.externalReference} to the provider`,
         changes: { rainTransferId: providerPayout.id },
       });
 
@@ -557,6 +558,48 @@ export async function completePayout(
       externalReference: payout.externalReference,
     });
 
+    /**
+     * Write the trader's new balance.
+     *
+     * Balances are normally a snapshot of what the provider reports. In mock
+     * mode there is no provider holding funds, so without this the ledger would
+     * show the payout delivered while the trader's balance stayed at zero —
+     * which is exactly what a completed payout must not look like.
+     *
+     * The figure comes from the internal ledger's USER_AVAILABLE_REPORTING, and
+     * is recorded with source INTERNAL so it is never mistaken for a provider
+     * balance. Once a real provider is settling transfers, its own snapshots
+     * supersede this.
+     */
+    const account = await tx.financialAccount.findFirst({
+      where: { partnerId: payout.partnerId, traderId: payout.traderId },
+      select: { id: true, network: true },
+    });
+
+    if (account) {
+      const available = await accountBalance(
+        tx,
+        payout.partnerId,
+        "USER_AVAILABLE_REPORTING",
+        payout.asset,
+      );
+
+      await tx.balanceSnapshot.create({
+        data: {
+          financialAccountId: account.id,
+          partnerId: payout.partnerId,
+          traderId: payout.traderId,
+          asset: payout.asset,
+          network: account.network,
+          availableMinor: available,
+          pendingMinor: 0n,
+          reservedMinor: 0n,
+          source: "INTERNAL",
+          asOf: new Date(),
+        },
+      });
+    }
+
     await recordAudit(tx, {
       partnerId: payout.partnerId,
       actor: { type: "SYSTEM", label: "payout-engine" },
@@ -613,7 +656,7 @@ export async function failPayout(
     if (
       payout.status === "APPROVED" ||
       payout.status === "FUNDING_PENDING" ||
-      payout.status === "SUBMITTED_TO_RAIN" ||
+      payout.status === "SUBMITTED_TO_PROVIDER" ||
       payout.status === "PROCESSING"
     ) {
       await recordPayoutFailed(

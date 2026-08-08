@@ -199,6 +199,17 @@ export async function syncBalances(
   deps: TransactionDeps,
   input: { partnerId: string; traderId: string },
 ): Promise<number> {
+  /**
+   * In mock mode there is no provider custodying funds, so its "balance" is
+   * fiction — and writing it would overwrite the balance the payout engine
+   * derived from the ledger with a newer, emptier snapshot. The trader would
+   * see a completed payout and a zero balance.
+   *
+   * With a real provider this runs normally: the provider is the source of
+   * truth for balances and its snapshots supersede anything internal.
+   */
+  if (deps.rain.mode === "mock") return 0;
+
   const accounts = await deps.db.financialAccount.findMany({
     where: { partnerId: input.partnerId, traderId: input.traderId, provider: "RAIN" },
   });

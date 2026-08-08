@@ -32,7 +32,7 @@ export default async function ProgramsPage() {
                 <Th>Partner</Th>
                 <Th>Product</Th>
                 <Th>Asset</Th>
-                <Th>Rain program id</Th>
+                <Th>Provider program id</Th>
                 <Th>Status</Th>
               </tr>
             </thead>

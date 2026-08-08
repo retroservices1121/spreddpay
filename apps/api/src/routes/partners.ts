@@ -340,8 +340,29 @@ export async function registerPartnerRoutes(
       // is unavailable the payout lands in MANUAL_REVIEW with an ops task, and
       // that is reported here rather than swallowed.
       try {
-        const submitted = await payoutService.submitPayout(deps, actor, { partnerId, payoutId });
-        return { payout: toPayoutDto(submitted), submitted: true };
+        await payoutService.submitPayout(deps, actor, { partnerId, payoutId });
+
+        /**
+         * In mock mode there is no provider to send a settlement webhook, so a
+         * payout would sit at SUBMITTED_TO_PROVIDER forever and the trader's
+         * balance would never move. Settle inline instead: the mock provider
+         * is instant by definition.
+         *
+         * With a real provider this stays untouched — settlement arrives as a
+         * webhook and the worker calls completePayout, which is the same code
+         * path. Nothing here fakes a settlement that a real provider has not
+         * confirmed.
+         */
+        if (context.env.RAIN_MODE === "mock" && context.env.DAKOTA_MODE === "mock") {
+          const completed = await payoutService.completePayout(deps, { payoutId });
+          return { payout: toPayoutDto(completed), submitted: true, settled: true };
+        }
+
+        const current = await context.db.payout.findFirst({
+          where: { id: payoutId, partnerId },
+          include: { trader: true, initiatedBy: true, approvedBy: true },
+        });
+        return { payout: current ? toPayoutDto(current) : null, submitted: true, settled: false };
       } catch (error) {
         const current = await context.db.payout.findFirst({
           where: { id: payoutId, partnerId },

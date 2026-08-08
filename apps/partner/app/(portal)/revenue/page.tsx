@@ -50,7 +50,7 @@ export default async function RevenuePage() {
 
       <div className="mb-6">
         <Callout tone="neutral" title="Configurable, not assumed">
-          Revenue rules are configuration, not hard-coded economics. Rain&apos;s commercial terms
+          Revenue rules are configuration, not hard-coded economics. Provider commercial terms
           are applied once confirmed; only realized revenue is recognised here.
         </Callout>
       </div>

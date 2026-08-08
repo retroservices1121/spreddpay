@@ -43,7 +43,7 @@ export default async function TransactionsPage() {
         {transactions.data.length === 0 ? (
           <EmptyState
             title="No transactions yet"
-            description="Card activity appears here as Rain reports it."
+            description="Card activity appears here as it is reported."
           />
         ) : (
           <Table>

@@ -11,9 +11,9 @@ export default async function NewPayoutPage() {
     `/partners/${session.partnerId}/traders?limit=100`,
   );
 
-  // Only traders with an active Rain account can receive funds.
+  // Only traders with an active provider account can receive funds.
   const eligible = traders.data.filter((trader) =>
-    ["RAIN_ACCOUNT_ACTIVE", "CARD_ELIGIBLE", "VIRTUAL_CARD_PENDING", "VIRTUAL_CARD_ACTIVE"].includes(
+    ["PROVIDER_ACCOUNT_ACTIVE", "CARD_ELIGIBLE", "VIRTUAL_CARD_PENDING", "VIRTUAL_CARD_ACTIVE"].includes(
       trader.status,
     ),
   );
@@ -22,12 +22,12 @@ export default async function NewPayoutPage() {
     <>
       <PageHeader
         title="New payout"
-        description="Funds become available on the trader's card through the approved Rain flow."
+        description="Funds become available in the trader's account once approved."
       />
 
       {eligible.length === 0 ? (
         <Callout tone="caution" title="No eligible traders">
-          A payout can only be created for a trader with an active Rain account. Complete onboarding
+          A payout can only be created for a trader with an active provider account. Complete onboarding
           for at least one trader first.
         </Callout>
       ) : (

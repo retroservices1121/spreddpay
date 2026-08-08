@@ -57,7 +57,7 @@ export async function partnerDashboard(
       where: {
         partnerId,
         status: {
-          in: ["RAIN_ACCOUNT_ACTIVE", "CARD_ELIGIBLE", "VIRTUAL_CARD_PENDING", "VIRTUAL_CARD_ACTIVE"],
+          in: ["PROVIDER_ACCOUNT_ACTIVE", "CARD_ELIGIBLE", "VIRTUAL_CARD_PENDING", "VIRTUAL_CARD_ACTIVE"],
         },
       },
     }),
@@ -75,7 +75,7 @@ export async function partnerDashboard(
             "PENDING_APPROVAL",
             "APPROVED",
             "FUNDING_PENDING",
-            "SUBMITTED_TO_RAIN",
+            "SUBMITTED_TO_PROVIDER",
             "PROCESSING",
           ],
         },

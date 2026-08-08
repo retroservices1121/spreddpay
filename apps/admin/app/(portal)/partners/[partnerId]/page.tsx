@@ -62,7 +62,7 @@ export default async function PartnerDetailPage({
               <dd>
                 <StatusBadge status={detail.partner.status} />
               </dd>
-              <dt className="text-ink-subtle">Rain program</dt>
+              <dt className="text-ink-subtle">Provider program</dt>
               <dd className="tabular">{detail.partner.rainProgramId ?? "Not yet issued"}</dd>
               <dt className="text-ink-subtle">Default asset</dt>
               <dd className="tabular">
@@ -110,7 +110,7 @@ export default async function PartnerDetailPage({
               {program.providerProgramId === null ? (
                 <div className="mt-4">
                   <Callout tone="caution" title="No provider program id">
-                    Rain has not issued a program id for this partner yet. Payouts run against the
+                    The provider has not issued a program id for this partner yet. Payouts run against the
                     configured integration mode until it is set.
                   </Callout>
                 </div>

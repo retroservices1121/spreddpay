@@ -5,7 +5,7 @@
  *   Product:      Demo Pay
  *   Trader:       Alex Morgan  (TRADER-28491)
  *   KYC:          Approved
- *   Rain account: Active
+ *   provider account: Active
  *   Virtual card: Active
  *   Payout:       4,850 USDC, Draft
  *   Transaction:  Online Purchase, $84.23, Pending
@@ -214,7 +214,7 @@ export async function seedDemo(db: Database): Promise<DemoSeedResult> {
     update: { status: "ACTIVE" },
   });
 
-  for (const status of ["KYC_PENDING", "KYC_APPROVED", "RAIN_ACCOUNT_ACTIVE"] as const) {
+  for (const status of ["KYC_PENDING", "KYC_APPROVED", "PROVIDER_ACCOUNT_ACTIVE"] as const) {
     const existing = await db.traderIdentityStatus.findFirst({
       where: { traderId: trader.id, status },
     });

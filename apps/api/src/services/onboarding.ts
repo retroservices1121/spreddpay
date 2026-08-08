@@ -265,7 +265,7 @@ export async function advanceOnboarding(
         "TERMS_PENDING",
         "KYC_PENDING",
         actor,
-        "KYC started with Rain",
+        "Identity verification started",
       );
 
       await deps.db.$transaction(async (tx) => {
@@ -282,7 +282,7 @@ export async function advanceOnboarding(
     case "KYC_PENDING":
     case "KYC_REVIEW": {
       if (!trader.rainCustomerId) {
-        throw AppError.conflict("Trader has no Rain customer record.");
+        throw AppError.conflict("Trader has no provider customer record.");
       }
       const kyc = await deps.rain.getKycStatus(trader.rainCustomerId);
 
@@ -303,7 +303,7 @@ export async function advanceOnboarding(
         trader.status,
         next,
         actor,
-        `Rain reported KYC ${kyc.status}`,
+        `Provider reported identity verification ${kyc.status}`,
       );
 
       await deps.db.$transaction(async (tx) => {
@@ -322,14 +322,14 @@ export async function advanceOnboarding(
         deps.db,
         trader.id,
         "KYC_APPROVED",
-        "RAIN_ACCOUNT_PENDING",
+        "PROVIDER_ACCOUNT_PENDING",
         actor,
-        "Requesting Rain account",
+        "Requesting provider account",
       );
 
-    case "RAIN_ACCOUNT_PENDING": {
+    case "PROVIDER_ACCOUNT_PENDING": {
       if (!trader.rainCustomerId) {
-        throw AppError.conflict("Trader has no Rain customer record.");
+        throw AppError.conflict("Trader has no provider customer record.");
       }
       const account = await deps.rain.createAccount({
         customerId: trader.rainCustomerId,
@@ -358,10 +358,10 @@ export async function advanceOnboarding(
       const updated = await transition(
         deps.db,
         trader.id,
-        "RAIN_ACCOUNT_PENDING",
-        "RAIN_ACCOUNT_ACTIVE",
+        "PROVIDER_ACCOUNT_PENDING",
+        "PROVIDER_ACCOUNT_ACTIVE",
         actor,
-        "Rain account active",
+        "provider account active",
       );
 
       await deps.db.$transaction(async (tx) => {
@@ -375,11 +375,11 @@ export async function advanceOnboarding(
       return updated;
     }
 
-    case "RAIN_ACCOUNT_ACTIVE":
+    case "PROVIDER_ACCOUNT_ACTIVE":
       return transition(
         deps.db,
         trader.id,
-        "RAIN_ACCOUNT_ACTIVE",
+        "PROVIDER_ACCOUNT_ACTIVE",
         "CARD_ELIGIBLE",
         actor,
         "Eligible for a virtual card",

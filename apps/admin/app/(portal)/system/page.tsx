@@ -35,13 +35,13 @@ export default async function SystemPage() {
             <dl className="grid grid-cols-[auto,1fr] gap-x-6 gap-y-2 text-sm">
               <dt className="text-ink-subtle">Environment</dt>
               <dd className="tabular">{system.nodeEnv}</dd>
-              <dt className="text-ink-subtle">Rain</dt>
+              <dt className="text-ink-subtle">Payments provider</dt>
               <dd>
                 <Badge tone={modeTone(system.integrationModes.rain)}>
                   {system.integrationModes.rain}
                 </Badge>
               </dd>
-              <dt className="text-ink-subtle">Blend</dt>
+              <dt className="text-ink-subtle">Yield provider</dt>
               <dd>
                 <Badge tone={modeTone(system.integrationModes.blend)}>
                   {system.integrationModes.blend}

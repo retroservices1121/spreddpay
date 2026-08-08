@@ -113,7 +113,7 @@ export function OnboardingStep({
     );
   }
 
-  if (status === "KYC_PENDING" || status === "KYC_REVIEW" || status === "RAIN_ACCOUNT_PENDING") {
+  if (status === "KYC_PENDING" || status === "KYC_REVIEW" || status === "PROVIDER_ACCOUNT_PENDING") {
     return (
       <div className="flex flex-col gap-3">
         {error ? <Callout tone="critical">{error}</Callout> : null}

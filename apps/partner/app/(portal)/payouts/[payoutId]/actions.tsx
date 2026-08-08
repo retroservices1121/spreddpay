@@ -55,7 +55,7 @@ export function PayoutActions({
       if (payload && payload.submitted === false && payload.submissionError) {
         setMessage({
           tone: "caution",
-          text: `Approved, but submission to Rain did not complete: ${payload.submissionError} The payout is in manual review and an operations task has been raised.`,
+          text: `Approved, but submission did not complete: ${payload.submissionError} The payout is in manual review and our operations team has been notified.`,
         });
       }
 

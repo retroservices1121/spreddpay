@@ -38,7 +38,7 @@ export default async function RevenuePage() {
               <li>8. Settlement marked paid</li>
             </ol>
             <p className="mt-4 text-xs text-ink-subtle">
-              Rain&apos;s commercial terms are configuration, not hard-coded. Estimated or
+              Provider commercial terms are configuration, not hard-coded. Estimated or
               unrealized yield is never recognised as settled revenue.
             </p>
           </CardBody>

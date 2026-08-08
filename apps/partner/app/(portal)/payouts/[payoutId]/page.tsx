@@ -114,7 +114,7 @@ export default async function PayoutDetailPage({
               <dt className="text-ink-subtle">Approved by</dt>
               <dd>{payout.approvedByName ?? "—"}</dd>
 
-              <dt className="text-ink-subtle">Rain transfer</dt>
+              <dt className="text-ink-subtle">Provider transfer</dt>
               <dd className="tabular break-all">{payout.rainTransferId ?? "—"}</dd>
 
               <dt className="text-ink-subtle">Transaction hash</dt>

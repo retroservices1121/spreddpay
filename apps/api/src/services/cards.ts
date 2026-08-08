@@ -66,7 +66,7 @@ export async function issueVirtualCard(
     where: { partnerId: input.partnerId, traderId: trader.id, provider: "RAIN" },
   });
   if (!account || !trader.rainCustomerId) {
-    throw AppError.conflict("Trader has no Rain account.");
+    throw AppError.conflict("Trader has no provider account.");
   }
 
   const cardLabel = trader.partner.branding?.cardLabel ?? "Payout Card";

@@ -39,7 +39,7 @@ export default async function TradersPage() {
         {traders.data.length === 0 ? (
           <EmptyState
             title="No traders yet"
-            description="Invite a trader to start the Rain onboarding flow."
+            description="Invite a trader to start onboarding."
           />
         ) : (
           <Table>

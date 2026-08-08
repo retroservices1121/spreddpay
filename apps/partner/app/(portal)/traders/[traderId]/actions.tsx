@@ -10,7 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
  * Drives the onboarding state machine one step at a time.
  *
  * Each click performs exactly one provider interaction, which is what makes the
- * demo legible: the operator can see KYC, then the Rain account, then card
+ * demo legible: the operator can see KYC, then the provider account, then card
  * eligibility land as distinct steps rather than one opaque jump.
  */
 export function TraderActions({
