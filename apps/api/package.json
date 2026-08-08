@@ -12,7 +12,8 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:db": "dotenv -e ../../.env -- vitest run"
+    "test:db": "dotenv -e ../../.env -- vitest run",
+    "mfa:reset": "dotenv -e ../../.env -- tsx src/scripts/reset-mfa.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
