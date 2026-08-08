@@ -27,8 +27,6 @@ export default async function DashboardPage() {
     apiFetch<{ data: PayoutDto[] }>(`/partners/${partnerId}/payouts?limit=8`),
   ]);
 
-  const activationRate = (metrics.activationRateBps / 100).toFixed(1);
-
   return (
     <>
       <PageHeader
@@ -71,11 +69,13 @@ export default async function DashboardPage() {
           label="Avg spend / active card"
           value={metrics.averageSpendPerActiveCard.display}
         />
-        <Stat
-          label="Activation rate"
-          value={`${activationRate}%`}
-          sublabel="Invited traders with an active card"
-        />
+        {/*
+          Activation rate counts traders holding an active card, and card
+          issuance is deferred until the provider's card programme opens. It
+          would read near zero for reasons that have nothing to do with the
+          partner's performance, so it is hidden rather than shown misleadingly.
+          Restore this when issuance is live.
+        */}
       </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
