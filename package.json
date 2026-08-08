@@ -24,7 +24,8 @@
     "db:backup": "dotenv -e .env -- bash scripts/backup.sh",
     "db:restore": "bash scripts/restore.sh",
     "mfa:reset": "pnpm --filter @spreddpay/api mfa:reset",
-    "payouts:settle-stuck": "pnpm --filter @spreddpay/api payouts:settle-stuck"
+    "payouts:settle-stuck": "pnpm --filter @spreddpay/api payouts:settle-stuck",
+    "demo:traders": "pnpm --filter @spreddpay/api demo:traders"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
