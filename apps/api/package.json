@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:db": "dotenv -e ../../.env -- vitest run",
-    "mfa:reset": "dotenv -e ../../.env -- tsx src/scripts/reset-mfa.ts"
+    "mfa:reset": "dotenv -e ../../.env -- tsx src/scripts/reset-mfa.ts",
+    "payouts:settle-stuck": "dotenv -e ../../.env -- tsx src/scripts/settle-stuck-payouts.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
